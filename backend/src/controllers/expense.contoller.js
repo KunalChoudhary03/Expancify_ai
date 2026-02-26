@@ -1,40 +1,33 @@
 const userModel = require("../model/user.model");
+const expenseModel = require("../model/expence.model");
 
 async function addExpense(req, res) {
-  const { title, amount, date, paidBy } = req.body;
+  const {email} = req.user
+  const { title, amount, date,paidBy } = req.body;
 
   try {
-    // basic validation
     if (!title || !amount) {
       return res.status(400).json({
         message: "Title and amount are required"
       });
     }
 
-    // find logged-in user
-    const user = await userModel.findById(req.user.id);
+    // req.user auth middleware se aata hai
+    const user = await userModel.findOne({ email: req.user.email });
     if (!user) {
-      return res.status(404).json({
-        message: "User not found"
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // expense object
-    const newExpense = {
+    const expense = await expenseModel.create({
       title,
       amount,
       date: date || new Date(),
-      paidBy
-    };
-
-    // push expense
-    user.expenses.push(newExpense);
-
-    await user.save();
+      paidBy: user.username
+    });
 
     res.status(201).json({
       message: "Expense added successfully",
-      expense: newExpense
+      expense
     });
 
   } catch (err) {
