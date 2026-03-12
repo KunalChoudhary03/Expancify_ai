@@ -7,6 +7,7 @@ import Home from '../components/Home'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
 import Dashboard from '../pages/Dashboard'
+import AdminPortal from '../pages/AdminPortal'
 import Features from '../pages/Features'
 import UpdateExpense from '../components/UpdateExpense'
 import DeleteExpense from '../components/DeleteExpense'
@@ -22,6 +23,7 @@ const AppRoutes = () => {
              <Route path='/AddExpense' element={<ExpenseForm />} />
              <Route path='/ExpenseCard' element={<ExpenseCard />} />
              <Route path='/dashboard' element={<Dashboard />} />
+             <Route path='/admin' element={<AdminPortal />} />
              <Route path='/login' element={<Login />} />
              <Route path='/update/:expenseId' element={<UpdateExpense />} />
              <Route path='/delete/:expenseId' element={<DeleteExpense />} />

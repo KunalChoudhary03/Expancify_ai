@@ -186,6 +186,15 @@ const Navbar = () => {
               Contact
             </button>
 
+            {isLoggedIn && (
+              <button
+                onClick={() => handleNavigation("/admin")}
+                className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium"
+              >
+                Admin
+              </button>
+            )}
+
             {/* Divider */}
             <div className="border-t border-gray-300 dark:border-gray-700 my-2"></div>
 

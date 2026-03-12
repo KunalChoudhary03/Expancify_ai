@@ -40,7 +40,52 @@ async function getUserExpenseById(req, res) {
     }
 }
 
+async function getUserSpendSummary(req, res) {
+    try {
+        const totals = await userModel.aggregate([
+            {
+                $lookup: {
+                    from: "expenses",
+                    localField: "_id",
+                    foreignField: "paidBy",
+                    as: "expenses"
+                }
+            },
+            {
+                $addFields: {
+                    totalSpent: { $sum: "$expenses.amount" },
+                    expenseCount: { $size: "$expenses" }
+                }
+            },
+            {
+                $project: {
+                    userId: "$_id",
+                    username: 1,
+                    email: 1,
+                    fullName: 1,
+                    totalSpent: { $ifNull: ["$totalSpent", 0] },
+                    expenseCount: { $ifNull: ["$expenseCount", 0] }
+                }
+            },
+            { $sort: { totalSpent: -1, expenseCount: -1 } }
+        ]);
+
+        const totalSpentAll = totals.reduce((sum, item) => sum + (item.totalSpent || 0), 0);
+
+        return res.status(200).json({
+            message: "User spend summary retrieved successfully",
+            totals,
+            totalSpentAll
+        });
+    } catch (err) {
+        return res.status(500).json({
+            message: "server error",
+            err
+        });
+    }
+}
+
 module.exports = {
-    getUser,getUserExpenseById
+    getUser,getUserExpenseById,getUserSpendSummary
 }
 
