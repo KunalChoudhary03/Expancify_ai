@@ -9,6 +9,10 @@ import Register from '../pages/Register'
 import Dashboard from '../pages/Dashboard'
 import AdminPortal from '../pages/AdminPortal'
 import Features from '../pages/Features'
+import RoomCreate from '../pages/RoomCreate'
+import RoomJoin from '../pages/RoomJoin'
+import RoomDashboard from '../pages/RoomDashboard'
+import RoomList from '../pages/RoomList'
 import UpdateExpense from '../components/UpdateExpense'
 import DeleteExpense from '../components/DeleteExpense'
 import Contact from '../pages/Contact'
@@ -24,6 +28,10 @@ const AppRoutes = () => {
              <Route path='/ExpenseCard' element={<ExpenseCard />} />
              <Route path='/dashboard' element={<Dashboard />} />
              <Route path='/admin' element={<AdminPortal />} />
+             <Route path='/room/create' element={<RoomCreate />} />
+             <Route path='/room/list' element={<RoomList />} />
+             <Route path='/room/join' element={<RoomJoin />} />
+             <Route path='/room/dashboard' element={<RoomDashboard />} />
              <Route path='/login' element={<Login />} />
              <Route path='/update/:expenseId' element={<UpdateExpense />} />
              <Route path='/delete/:expenseId' element={<DeleteExpense />} />

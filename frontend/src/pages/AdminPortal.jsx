@@ -17,10 +17,20 @@ const AdminPortal = () => {
   const [summaryError, setSummaryError] = useState("");
   const [spendSummary, setSpendSummary] = useState([]);
   const [totalSpentAll, setTotalSpentAll] = useState(0);
+  const [rooms, setRooms] = useState([]);
+  const [filteredRooms, setFilteredRooms] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [roomExpenses, setRoomExpenses] = useState([]);
+  const [roomSearch, setRoomSearch] = useState("");
+  const [loadingRooms, setLoadingRooms] = useState(true);
+  const [loadingRoomExpenses, setLoadingRoomExpenses] = useState(false);
+  const [roomError, setRoomError] = useState("");
+  const [roomInfo, setRoomInfo] = useState("");
 
   useEffect(() => {
     fetchUsers();
     fetchSpendSummary();
+    fetchRooms();
   }, []);
 
   useEffect(() => {
@@ -41,6 +51,23 @@ const AdminPortal = () => {
 
     setFilteredUsers(matches);
   }, [search, users]);
+
+  useEffect(() => {
+    const query = roomSearch.trim().toLowerCase();
+    if (!query) {
+      setFilteredRooms(rooms);
+      return;
+    }
+
+    const matches = rooms.filter((room) => {
+      return (
+        room.code?.toLowerCase().includes(query) ||
+        room.name?.toLowerCase().includes(query)
+      );
+    });
+
+    setFilteredRooms(matches);
+  }, [roomSearch, rooms]);
 
   const fetchUsers = async () => {
     try {
@@ -95,6 +122,32 @@ const AdminPortal = () => {
     }
   };
 
+  const fetchRooms = async () => {
+    try {
+      setLoadingRooms(true);
+      setRoomError("");
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setRoomError("Please login to access rooms.");
+        navigate("/login");
+        return;
+      }
+
+      const res = await axios.get("http://localhost:3000/api/admin/room", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const list = res.data?.rooms || [];
+      setRooms(list);
+      setFilteredRooms(list);
+    } catch (err) {
+      const message = err.response?.data?.message || "Failed to load rooms";
+      setRoomError(message);
+    } finally {
+      setLoadingRooms(false);
+    }
+  };
+
   const handleSelectUser = async (user) => {
     setSelectedUser(user);
     setExpenses([]);
@@ -137,11 +190,75 @@ const AdminPortal = () => {
     return expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
   }, [expenses]);
 
+  const roomTotalAmount = useMemo(() => {
+    return roomExpenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  }, [roomExpenses]);
+
   const formattedName = (user) => {
     if (!user) return "";
     const first = user.fullName?.firstName || "";
     const last = user.fullName?.lastName || "";
     return `${first} ${last}`.trim() || user.username;
+  };
+
+  const handleSelectRoom = async (room) => {
+    setSelectedRoom(room);
+    setRoomExpenses([]);
+    setRoomInfo("");
+    setRoomError("");
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setRoomError("Please login to view room expenses.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setLoadingRoomExpenses(true);
+      const res = await axios.get(`http://localhost:3000/api/admin/room/expense/${room.code}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const list = res.data?.expenses || [];
+      if (!list.length) setRoomInfo("No expenses found for this room.");
+      setRoomExpenses(list);
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setRoomInfo("No expenses found for this room.");
+        setRoomExpenses([]);
+      } else {
+        const message = err.response?.data?.message || "Failed to load room expenses";
+        setRoomError(message);
+      }
+    } finally {
+      setLoadingRoomExpenses(false);
+    }
+  };
+
+  const handleDeleteRoom = async (code) => {
+    const confirmDelete = window.confirm("Delete this room and all its expenses?");
+    if (!confirmDelete) return;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setRoomError("Please login to delete rooms.");
+        navigate("/login");
+        return;
+      }
+
+      await axios.delete(`http://localhost:3000/api/admin/room/${code}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (selectedRoom?.code === code) {
+        setSelectedRoom(null);
+        setRoomExpenses([]);
+      }
+      fetchRooms();
+    } catch (err) {
+      const message = err.response?.data?.message || "Failed to delete room";
+      setRoomError(message);
+    }
   };
 
   return (
@@ -192,6 +309,10 @@ const AdminPortal = () => {
           <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow-lg">
             <p className="text-slate-400 text-sm">Total Spend (all users)</p>
             <p className="text-3xl font-bold mt-1">₹{Number(totalSpentAll).toLocaleString()}</p>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow-lg">
+            <p className="text-slate-400 text-sm">Total Rooms</p>
+            <p className="text-3xl font-bold mt-1">{rooms.length}</p>
           </div>
         </div>
 
@@ -250,15 +371,15 @@ const AdminPortal = () => {
           )}
         </div>
 
-        {(error || info) && (
+        {(error || info || roomError || roomInfo) && (
           <div
             className={`p-4 rounded-2xl border ${
-              error
+              error || roomError
                 ? "bg-red-500/10 border-red-500 text-red-200"
                 : "bg-indigo-500/10 border-indigo-500 text-indigo-200"
             }`}
           >
-            {error || info}
+            {error || roomError || info || roomInfo}
           </div>
         )}
 
@@ -327,24 +448,24 @@ const AdminPortal = () => {
                 {loadingExpenses ? (
                   <p className="text-slate-400">Loading expenses…</p>
                 ) : expenses.length ? (
-                  <div className="overflow-x-auto border border-slate-800 rounded-xl">
+                  <div className="overflow-x-auto overflow-y-auto max-h-96 border border-slate-800 rounded-xl shadow-inner bg-slate-950/40">
                     <table className="w-full text-left text-sm">
-                      <thead className="bg-slate-800 text-slate-300">
+                      <thead className="bg-slate-800/80 text-slate-200 sticky top-0 backdrop-blur">
                         <tr>
                           <th className="px-4 py-3">Title</th>
-                          <th className="px-4 py-3">Amount</th>
-                          <th className="px-4 py-3">Date</th>
+                          <th className="px-4 py-3 text-right">Amount</th>
+                          <th className="px-4 py-3 text-right">Date</th>
                         </tr>
                       </thead>
                       <tbody>
                         {expenses.map((expense) => (
                           <tr
                             key={expense._id}
-                            className="border-t border-slate-800 hover:bg-slate-800/50"
+                            className="border-t border-slate-800 hover:bg-slate-800/60"
                           >
-                            <td className="px-4 py-3 font-medium text-white">{expense.title}</td>
-                            <td className="px-4 py-3 text-indigo-200">₹{Number(expense.amount).toLocaleString()}</td>
-                            <td className="px-4 py-3 text-slate-400">{expense.date}</td>
+                            <td className="px-4 py-3 font-medium text-white whitespace-normal break-words">{expense.title}</td>
+                            <td className="px-4 py-3 text-indigo-200 text-right whitespace-nowrap">₹{Number(expense.amount).toLocaleString()}</td>
+                            <td className="px-4 py-3 text-slate-400 text-right whitespace-nowrap">{expense.date}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -353,6 +474,121 @@ const AdminPortal = () => {
                 ) : (
                   <div className="text-slate-400 bg-slate-800/60 border border-slate-700 rounded-xl p-6 text-center">
                     No expenses to show.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 relative">
+                <input
+                  value={roomSearch}
+                  onChange={(e) => setRoomSearch(e.target.value)}
+                  placeholder="Search room by code or name"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <button
+                onClick={fetchRooms}
+                className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 hover:border-indigo-500 text-sm"
+              >
+                Refresh
+              </button>
+            </div>
+
+            <div className="h-[520px] overflow-y-auto space-y-3 pr-1">
+              {loadingRooms ? (
+                <p className="text-slate-400">Loading rooms…</p>
+              ) : filteredRooms.length ? (
+                filteredRooms.map((room) => (
+                  <div
+                    key={room._id || room.code}
+                    className={`p-4 rounded-xl border transition cursor-pointer bg-slate-800/50 border-slate-800 hover:border-indigo-500 hover:bg-slate-800 ${
+                      selectedRoom?.code === room.code ? "border-indigo-500" : ""
+                    }`}
+                    onClick={() => handleSelectRoom(room)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-lg">{room.name || "Untitled room"}</p>
+                        <p className="text-sm text-slate-400">Code: {room.code}</p>
+                        <p className="text-xs text-slate-500">Members: {room.memberCount || 0} · Expenses: {room.expenseCount || 0}</p>
+                      </div>
+                      <button className="text-sm px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700">
+                        View
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-slate-400">No rooms found.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+            {!selectedRoom ? (
+              <div className="h-full flex flex-col items-center justify-center text-center space-y-2 text-slate-400">
+                <div className="text-4xl">🏠</div>
+                <p>Select a room to review its expenses.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <p className="text-sm text-slate-400">Selected room</p>
+                    <h2 className="text-2xl font-semibold">{selectedRoom.name || "Untitled room"}</h2>
+                    <p className="text-slate-400 text-sm">Code: {selectedRoom.code}</p>
+                    <p className="text-slate-400 text-sm">Members: {selectedRoom.memberCount || 0}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="text-sm bg-slate-800 px-4 py-2 rounded-lg border border-slate-700">
+                      Expenses: {selectedRoom.expenseCount || 0}
+                    </div>
+                    <div className="text-sm bg-slate-800 px-4 py-2 rounded-lg border border-slate-700">
+                      Spent: ₹{Number(roomTotalAmount || selectedRoom.totalSpent || 0).toLocaleString()}
+                    </div>
+                    <button
+                      onClick={() => handleDeleteRoom(selectedRoom.code)}
+                      className="text-sm px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+
+                {loadingRoomExpenses ? (
+                  <p className="text-slate-400">Loading room expenses…</p>
+                ) : roomExpenses.length ? (
+                  <div className="overflow-x-auto border border-slate-800 rounded-xl">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-slate-800 text-slate-300">
+                        <tr>
+                          <th className="px-4 py-3">Title</th>
+                          <th className="px-4 py-3">Paid By</th>
+                          <th className="px-4 py-3">Amount</th>
+                          <th className="px-4 py-3">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {roomExpenses.map((expense) => (
+                          <tr key={expense.id} className="border-t border-slate-800 hover:bg-slate-800/50">
+                            <td className="px-4 py-3 font-medium text-white">{expense.title}</td>
+                            <td className="px-4 py-3 text-slate-300">{expense.paidByName || expense.paidBy}</td>
+                            <td className="px-4 py-3 text-indigo-200">₹{Number(expense.amount).toLocaleString()}</td>
+                            <td className="px-4 py-3 text-slate-400">{expense.date ? new Date(expense.date).toLocaleDateString() : ""}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-slate-400 bg-slate-800/60 border border-slate-700 rounded-xl p-6 text-center">
+                    No expenses to show for this room.
                   </div>
                 )}
               </div>

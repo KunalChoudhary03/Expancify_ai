@@ -94,6 +94,22 @@ const Navbar = () => {
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </li>
+          <li 
+            onClick={()=>navigate("/room/create")} 
+            className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-110 relative overflow-hidden group"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              <span className="text-lg"></span>
+              Create Room
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </li>
+          <li 
+            onClick={()=>navigate("/room/list")} 
+            className="bg-slate-900 text-white px-4 py-2 rounded-full font-semibold cursor-pointer border border-slate-700 hover:border-indigo-500 transition"
+          >
+            My Rooms
+          </li>
             <li onClick={()=>navigate("/features")} className="hover:text-indigo-600 cursor-pointer transition">
             Features
           </li>
@@ -184,6 +200,19 @@ const Navbar = () => {
               className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium"
             >
               Contact
+            </button>
+
+            <button
+              onClick={() => handleNavigation("/room/create")}
+              className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium"
+            >
+              Create Room
+            </button>
+            <button
+              onClick={() => handleNavigation("/room/list")}
+              className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium"
+            >
+              My Rooms
             </button>
 
             {isLoggedIn && (
