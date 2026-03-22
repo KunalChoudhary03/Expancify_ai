@@ -17,8 +17,8 @@ const RoomDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const roomCode = params.get("room") || "";
-  const roomName = params.get("roomName") || "";
+  const roomCode = params.get("circle") || "";
+  const roomName = params.get("circleName") || "";
 
   const [members, setMembers] = useState([]);
   const [selectedMemberId, setSelectedMemberId] = useState("");
@@ -41,7 +41,7 @@ const RoomDashboard = () => {
     setMembers(memberList);
     setParticipants(memberList.map((m) => m.id));
 
-    const stored = localStorage.getItem(`roomIdentity_${roomCode}`);
+    const stored = localStorage.getItem(`circleIdentity_${roomCode}`);
     if (stored) {
       const parsed = JSON.parse(stored);
       setSelectedMemberId(parsed.id);
@@ -71,12 +71,12 @@ const RoomDashboard = () => {
       }
 
       if (!roomCode) {
-        setError("Room code missing");
+        setError("Circle code missing");
         return;
       }
 
       await axios.post(
-        "http://localhost:3000/api/room/create",
+        "http://localhost:3000/api/circle/create",
         {
           roomCode,
           roomName,
@@ -87,7 +87,7 @@ const RoomDashboard = () => {
 
       fetchBalances();
     } catch (err) {
-      setError(err.response?.data?.message || "Room not found");
+      setError(err.response?.data?.message || "Circle not found");
     }
   };
 
@@ -105,7 +105,7 @@ const RoomDashboard = () => {
 
       const token = localStorage.getItem("token");
       await axios.post(
-        `http://localhost:3000/api/room/${roomCode}/expense`,
+        `http://localhost:3000/api/circle/${roomCode}/expense`,
         {
           title,
           amount,
@@ -132,7 +132,7 @@ const RoomDashboard = () => {
     try {
       setLoadingBalances(true);
       const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:3000/api/room/${roomCode}/balances`, {
+      const res = await axios.get(`http://localhost:3000/api/circle/${roomCode}/balances`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBalances((res.data.balances || []).map((b) => ({ userId: b.id, net: b.net, name: b.name })));
@@ -157,8 +157,8 @@ const RoomDashboard = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-6 space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Room</p>
-              <h1 className="text-2xl font-bold">{roomName || roomCode || "Room"}</h1>
+              <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Circle</p>
+              <h1 className="text-2xl font-bold">{roomName || roomCode || "Circle"}</h1>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-400">
               <span className="bg-slate-800/70 border border-slate-700 rounded-full px-3 py-1">Code: {roomCode || "-"}</span>
@@ -191,7 +191,7 @@ const RoomDashboard = () => {
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
             <div className="border-b border-slate-800 pb-4">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Expense form</p>
-              <h2 className="text-xl font-semibold">Add expense in this room</h2>
+              <h2 className="text-xl font-semibold">Add expense in this circle</h2>
             </div>
 
             <div className="space-y-4">
@@ -203,7 +203,7 @@ const RoomDashboard = () => {
                   onChange={(e) => {
                     setSelectedMemberId(e.target.value);
                     const member = members.find((m) => m.id === e.target.value);
-                    if (member) localStorage.setItem(`roomIdentity_${roomCode}`, JSON.stringify(member));
+                    if (member) localStorage.setItem(`circleIdentity_${roomCode}`, JSON.stringify(member));
                   }}
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500"
                 >
@@ -273,7 +273,7 @@ const RoomDashboard = () => {
                       />
                     </label>
                   ))}
-                  {members.length === 0 && <p className="text-slate-500 text-sm">No members in this room.</p>}
+                  {members.length === 0 && <p className="text-slate-500 text-sm">No members in this circle.</p>}
                 </div>
 
                 <button

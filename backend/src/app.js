@@ -18,7 +18,7 @@ app.use("/api/expenses", expenseRoutes)
 app.use("/api/ai", aiRoutes)
 app.use("/api/admin", adminRoutes)
 app.use("/api/split", splitRoutes)
-app.use("/api/room", roomRoutes)
+app.use("/api/circle", roomRoutes)
 module.exports = app
 
 

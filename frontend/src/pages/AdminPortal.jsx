@@ -128,12 +128,12 @@ const AdminPortal = () => {
       setRoomError("");
       const token = localStorage.getItem("token");
       if (!token) {
-        setRoomError("Please login to access rooms.");
+        setRoomError("Please login to access circles.");
         navigate("/login");
         return;
       }
 
-      const res = await axios.get("http://localhost:3000/api/admin/room", {
+      const res = await axios.get("http://localhost:3000/api/admin/circle", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -141,7 +141,7 @@ const AdminPortal = () => {
       setRooms(list);
       setFilteredRooms(list);
     } catch (err) {
-      const message = err.response?.data?.message || "Failed to load rooms";
+      const message = err.response?.data?.message || "Failed to load circles";
       setRoomError(message);
     } finally {
       setLoadingRooms(false);
@@ -209,25 +209,25 @@ const AdminPortal = () => {
 
     const token = localStorage.getItem("token");
     if (!token) {
-      setRoomError("Please login to view room expenses.");
+      setRoomError("Please login to view circle expenses.");
       navigate("/login");
       return;
     }
 
     try {
       setLoadingRoomExpenses(true);
-      const res = await axios.get(`http://localhost:3000/api/admin/room/expense/${room.code}`, {
+      const res = await axios.get(`http://localhost:3000/api/admin/circle/expense/${room.code}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const list = res.data?.expenses || [];
-      if (!list.length) setRoomInfo("No expenses found for this room.");
+      if (!list.length) setRoomInfo("No expenses found for this circle.");
       setRoomExpenses(list);
     } catch (err) {
       if (err.response?.status === 404) {
-        setRoomInfo("No expenses found for this room.");
+        setRoomInfo("No expenses found for this circle.");
         setRoomExpenses([]);
       } else {
-        const message = err.response?.data?.message || "Failed to load room expenses";
+        const message = err.response?.data?.message || "Failed to load circle expenses";
         setRoomError(message);
       }
     } finally {
@@ -236,17 +236,17 @@ const AdminPortal = () => {
   };
 
   const handleDeleteRoom = async (code) => {
-    const confirmDelete = window.confirm("Delete this room and all its expenses?");
+    const confirmDelete = window.confirm("Delete this circle and all its expenses?");
     if (!confirmDelete) return;
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        setRoomError("Please login to delete rooms.");
+        setRoomError("Please login to delete circles.");
         navigate("/login");
         return;
       }
 
-      await axios.delete(`http://localhost:3000/api/admin/room/${code}`, {
+      await axios.delete(`http://localhost:3000/api/admin/circle/${code}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -256,7 +256,7 @@ const AdminPortal = () => {
       }
       fetchRooms();
     } catch (err) {
-      const message = err.response?.data?.message || "Failed to delete room";
+      const message = err.response?.data?.message || "Failed to delete circle";
       setRoomError(message);
     }
   };
@@ -311,7 +311,7 @@ const AdminPortal = () => {
             <p className="text-3xl font-bold mt-1">₹{Number(totalSpentAll).toLocaleString()}</p>
           </div>
           <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow-lg">
-            <p className="text-slate-400 text-sm">Total Rooms</p>
+            <p className="text-slate-400 text-sm">Total Circles</p>
             <p className="text-3xl font-bold mt-1">{rooms.length}</p>
           </div>
         </div>
@@ -488,7 +488,7 @@ const AdminPortal = () => {
                 <input
                   value={roomSearch}
                   onChange={(e) => setRoomSearch(e.target.value)}
-                  placeholder="Search room by code or name"
+                  placeholder="Search circle by code or name"
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
@@ -502,7 +502,7 @@ const AdminPortal = () => {
 
             <div className="h-[520px] overflow-y-auto space-y-3 pr-1">
               {loadingRooms ? (
-                <p className="text-slate-400">Loading rooms…</p>
+                <p className="text-slate-400">Loading circles…</p>
               ) : filteredRooms.length ? (
                 filteredRooms.map((room) => (
                   <div
@@ -514,7 +514,7 @@ const AdminPortal = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold text-lg">{room.name || "Untitled room"}</p>
+                        <p className="font-semibold text-lg">{room.name || "Untitled circle"}</p>
                         <p className="text-sm text-slate-400">Code: {room.code}</p>
                         <p className="text-xs text-slate-500">Members: {room.memberCount || 0} · Expenses: {room.expenseCount || 0}</p>
                       </div>
@@ -525,7 +525,7 @@ const AdminPortal = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-slate-400">No rooms found.</p>
+                <p className="text-slate-400">No circles found.</p>
               )}
             </div>
           </div>
@@ -534,14 +534,14 @@ const AdminPortal = () => {
             {!selectedRoom ? (
               <div className="h-full flex flex-col items-center justify-center text-center space-y-2 text-slate-400">
                 <div className="text-4xl">🏠</div>
-                <p>Select a room to review its expenses.</p>
+                <p>Select a circle to review its expenses.</p>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <p className="text-sm text-slate-400">Selected room</p>
-                    <h2 className="text-2xl font-semibold">{selectedRoom.name || "Untitled room"}</h2>
+                    <p className="text-sm text-slate-400">Selected circle</p>
+                    <h2 className="text-2xl font-semibold">{selectedRoom.name || "Untitled circle"}</h2>
                     <p className="text-slate-400 text-sm">Code: {selectedRoom.code}</p>
                     <p className="text-slate-400 text-sm">Members: {selectedRoom.memberCount || 0}</p>
                   </div>
@@ -562,7 +562,7 @@ const AdminPortal = () => {
                 </div>
 
                 {loadingRoomExpenses ? (
-                  <p className="text-slate-400">Loading room expenses…</p>
+                  <p className="text-slate-400">Loading circle expenses…</p>
                 ) : roomExpenses.length ? (
                   <div className="overflow-x-auto border border-slate-800 rounded-xl">
                     <table className="w-full text-left text-sm">
@@ -588,7 +588,7 @@ const AdminPortal = () => {
                   </div>
                 ) : (
                   <div className="text-slate-400 bg-slate-800/60 border border-slate-700 rounded-xl p-6 text-center">
-                    No expenses to show for this room.
+                    No expenses to show for this circle.
                   </div>
                 )}
               </div>

@@ -16,8 +16,8 @@ const RoomJoin = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  const roomCode = params.get("room") || "";
-  const roomName = params.get("roomName") || "";
+  const roomCode = params.get("circle") || "";
+  const roomName = params.get("circleName") || "";
 
   const [members, setMembers] = useState([]);
   const [selectedId, setSelectedId] = useState("");
@@ -25,7 +25,7 @@ const RoomJoin = () => {
   useEffect(() => {
     const list = parseMembers(location.search);
     setMembers(list);
-    const stored = localStorage.getItem(`roomIdentity_${roomCode}`);
+    const stored = localStorage.getItem(`circleIdentity_${roomCode}`);
     if (stored) {
       const parsed = JSON.parse(stored);
       setSelectedId(parsed.id);
@@ -35,16 +35,16 @@ const RoomJoin = () => {
   const handleContinue = () => {
     const member = members.find((m) => m.id === selectedId);
     if (!member) return;
-    localStorage.setItem(`roomIdentity_${roomCode}`, JSON.stringify(member));
-    navigate(`/room/dashboard${location.search}`);
+    localStorage.setItem(`circleIdentity_${roomCode}`, JSON.stringify(member));
+    navigate(`/circle/dashboard${location.search}`);
   };
 
   return (
     <div className="min-h-screen bg-gray-950 text-white pt-24 pb-16 px-4">
       <div className="max-w-xl mx-auto space-y-6">
         <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 rounded-3xl p-8 shadow-2xl space-y-2">
-          <p className="text-indigo-100 text-sm uppercase tracking-wider">Join Room</p>
-          <h1 className="text-3xl font-bold">{roomName || "Room"}</h1>
+          <p className="text-indigo-100 text-sm uppercase tracking-wider">Join Circle</p>
+          <h1 className="text-3xl font-bold">{roomName || "Circle"}</h1>
           <p className="text-indigo-100">Code: {roomCode}</p>
         </div>
 

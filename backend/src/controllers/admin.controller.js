@@ -120,7 +120,7 @@ async function getRooms(req, res) {
             { $sort: { createdAt: -1 } }
         ]);
 
-        return res.status(200).json({ message: "rooms retrieved", rooms });
+        return res.status(200).json({ message: "circles retrieved", rooms });
     } catch (err) {
         return res.status(500).json({ message: "server error", err });
     }
@@ -130,8 +130,8 @@ async function getRoomExpenses(req, res) {
     try {
         const { code } = req.params;
         const room = await roomModel.findOne({ code });
-        if (!room) return res.status(404).json({ message: "room not found" });
-        if (room.deleted) return res.status(410).json({ message: room.deletedReason || "room deleted by admin" });
+        if (!room) return res.status(404).json({ message: "circle not found" });
+        if (room.deleted) return res.status(410).json({ message: room.deletedReason || "circle deleted by admin" });
 
         const expenses = await roomExpenseModel.find({ roomCode: code }).sort({ createdAt: -1 });
         const membersById = new Map(room.members.map((m) => [m.id, m.name]));
@@ -147,7 +147,7 @@ async function getRoomExpenses(req, res) {
             participantNames: (exp.participants || []).map((p) => membersById.get(p) || p)
         }));
 
-        return res.status(200).json({ message: "room expenses retrieved", expenses: detailed });
+        return res.status(200).json({ message: "circle expenses retrieved", expenses: detailed });
     } catch (err) {
         return res.status(500).json({ message: "server error", err });
     }
@@ -157,17 +157,17 @@ async function deleteRoomAdmin(req, res) {
     try {
         const { code } = req.params;
         const room = await roomModel.findOne({ code });
-        if (!room) return res.status(404).json({ message: "room not found" });
-        if (room.deleted) return res.status(410).json({ message: room.deletedReason || "room deleted by admin" });
+        if (!room) return res.status(404).json({ message: "circle not found" });
+        if (room.deleted) return res.status(410).json({ message: room.deletedReason || "circle deleted by admin" });
 
         await roomExpenseModel.deleteMany({ roomCode: code });
         room.deleted = true;
         room.deletedByAdmin = true;
-        room.deletedReason = "Room deleted by admin";
+        room.deletedReason = "Circle deleted by admin";
         room.deletedAt = new Date();
         await room.save();
 
-        return res.status(200).json({ message: "room deleted by admin" });
+        return res.status(200).json({ message: "circle deleted by admin" });
     } catch (err) {
         return res.status(500).json({ message: "server error", err });
     }

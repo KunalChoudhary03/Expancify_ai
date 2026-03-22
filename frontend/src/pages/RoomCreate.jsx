@@ -18,7 +18,7 @@ const RoomCreate = () => {
   const generateCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
   useEffect(() => {
-    const saved = localStorage.getItem("roomDraft");
+    const saved = localStorage.getItem("circleDraft");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -37,7 +37,7 @@ const RoomCreate = () => {
   useEffect(() => {
     if (!initialized) return;
     localStorage.setItem(
-      "roomDraft",
+      "circleDraft",
       JSON.stringify({ roomName, roomCode, members })
     );
   }, [initialized, roomName, roomCode, members]);
@@ -56,10 +56,10 @@ const RoomCreate = () => {
 
   const shareLink = useMemo(() => {
     const params = new URLSearchParams();
-    params.set("room", roomCode);
-    if (roomName) params.set("roomName", roomName);
+    params.set("circle", roomCode);
+    if (roomName) params.set("circleName", roomName);
     if (members.length) params.set("members", encodeMembers(members));
-    return `${window.location.origin}/room/join?${params.toString()}`;
+    return `${window.location.origin}/circle/join?${params.toString()}`;
   }, [roomCode, roomName, members]);
 
   const syncRoom = async () => {
@@ -70,13 +70,13 @@ const RoomCreate = () => {
 
       const token = localStorage.getItem("token");
       if (!token) {
-        setError("Please login to create room");
+        setError("Please login to create a circle");
         navigate("/login");
         return false;
       }
 
       await axios.post(
-        "http://localhost:3000/api/room/create",
+        "http://localhost:3000/api/circle/create",
         {
           roomCode,
           roomName,
@@ -86,10 +86,10 @@ const RoomCreate = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setSuccess("Room saved");
+      setSuccess("Circle saved");
       return true;
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to create room");
+      setError(err.response?.data?.message || "Failed to create circle");
       return false;
     } finally {
       setLoading(false);
@@ -98,7 +98,7 @@ const RoomCreate = () => {
 
   const goToJoin = async () => {
     const ok = await syncRoom();
-    if (ok) navigate(`/room/join?${shareLink.split("?")[1]}`);
+    if (ok) navigate(`/circle/join?${shareLink.split("?")[1]}`);
   };
 
   const resetRoom = () => {
@@ -108,10 +108,10 @@ const RoomCreate = () => {
     setMemberInput("");
     setError("");
     setSuccess("");
-    localStorage.removeItem("roomDraft");
+    localStorage.removeItem("circleDraft");
   };
 
-  const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`Room: ${roomName || roomCode}\nJoin: ${shareLink}`)}`;
+  const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`Circle: ${roomName || roomCode}\nJoin: ${shareLink}`)}`;
 
   return (
     <div className="min-h-screen bg-gray-950 text-white pt-24 pb-16 px-4">
@@ -119,7 +119,7 @@ const RoomCreate = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 px-6 py-5 flex items-center justify-between">
             <div>
-              <p className="text-indigo-100 text-xs uppercase tracking-[0.12em]">Create a room</p>
+              <p className="text-indigo-100 text-xs uppercase tracking-[0.12em]">Create a circle</p>
               <h1 className="text-2xl font-bold">Split faster with one invite</h1>
             </div>
             <span className="text-sm bg-white/20 border border-white/30 rounded-full px-3 py-1">Code: {roomCode}</span>
@@ -127,7 +127,7 @@ const RoomCreate = () => {
 
           <div className="p-6 space-y-6">
             <div className="space-y-2">
-              <p className="text-sm text-slate-400">Step 1 · Room name</p>
+              <p className="text-sm text-slate-400">Step 1 · Circle name</p>
               <input
                 value={roomName}
                 onChange={(e) => setRoomName(e.target.value)}

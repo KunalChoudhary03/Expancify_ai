@@ -5,14 +5,14 @@ import axios from "axios";
 const encodeMembers = (members) => btoa(JSON.stringify(members || []));
 const buildShareLink = (room) => {
   const params = new URLSearchParams();
-  params.set("room", room.code);
-  if (room.name) params.set("roomName", room.name);
+  params.set("circle", room.code);
+  if (room.name) params.set("circleName", room.name);
   if (room.members?.length) params.set("members", encodeMembers(room.members));
-  return `${window.location.origin}/room/join?${params.toString()}`;
+  return `${window.location.origin}/circle/join?${params.toString()}`;
 };
 const buildWhatsAppHref = (room) => {
   const link = buildShareLink(room);
-  return `https://wa.me/?text=${encodeURIComponent(`Room: ${room.name || room.code}\nJoin: ${link}`)}`;
+  return `https://wa.me/?text=${encodeURIComponent(`Circle: ${room.name || room.code}\nJoin: ${link}`)}`;
 };
 
 const RoomList = () => {
@@ -36,12 +36,12 @@ const RoomList = () => {
         navigate("/login");
         return;
       }
-      const res = await axios.get("http://localhost:3000/api/room", {
+      const res = await axios.get("http://localhost:3000/api/circle", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRooms(res.data.rooms || []);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load rooms");
+      setError(err.response?.data?.message || "Failed to load circles");
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ const RoomList = () => {
       }
 
       await axios.put(
-        `http://localhost:3000/api/room/${editingCode}`,
+        `http://localhost:3000/api/circle/${editingCode}`,
         {
           roomName: editingName,
           members: editingMembers,
@@ -100,14 +100,14 @@ const RoomList = () => {
       cancelEdit();
       fetchRooms();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update room");
+      setError(err.response?.data?.message || "Failed to update circle");
     } finally {
       setSaving(false);
     }
   };
 
   const deleteRoom = async (code) => {
-    const confirmDelete = window.confirm("Delete this room and its expenses?");
+    const confirmDelete = window.confirm("Delete this circle and its expenses?");
     if (!confirmDelete) return;
     try {
       setDeletingCode(code);
@@ -117,13 +117,13 @@ const RoomList = () => {
         navigate("/login");
         return;
       }
-      await axios.delete(`http://localhost:3000/api/room/${code}`, {
+      await axios.delete(`http://localhost:3000/api/circle/${code}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (editingCode === code) cancelEdit();
       fetchRooms();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to delete room");
+      setError(err.response?.data?.message || "Failed to delete circle");
     } finally {
       setDeletingCode("");
     }
@@ -131,10 +131,10 @@ const RoomList = () => {
 
   const goToRoom = (room) => {
     const params = new URLSearchParams();
-    params.set("room", room.code);
-    if (room.name) params.set("roomName", room.name);
+    params.set("circle", room.code);
+    if (room.name) params.set("circleName", room.name);
     if (room.members?.length) params.set("members", encodeMembers(room.members));
-    navigate(`/room/dashboard?${params.toString()}`);
+    navigate(`/circle/dashboard?${params.toString()}`);
   };
 
   return (
@@ -142,13 +142,13 @@ const RoomList = () => {
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 rounded-3xl p-8 shadow-2xl flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <p className="text-indigo-100 text-sm uppercase tracking-wider">My Rooms</p>
-            <h1 className="text-3xl font-bold">Rooms you created</h1>
+            <p className="text-indigo-100 text-sm uppercase tracking-wider">My Circles</p>
+            <h1 className="text-3xl font-bold">Circles you created</h1>
             <p className="text-indigo-100 text-sm">Total: {rooms.length}</p>
           </div>
           <div className="flex gap-2">
             <button onClick={fetchRooms} className="bg-white/15 border border-white/30 text-white px-4 py-2 rounded-xl hover:bg-white/25">Refresh</button>
-            <button onClick={() => navigate("/room/create")} className="bg-white text-indigo-700 px-4 py-2 rounded-xl font-semibold shadow hover:-translate-y-0.5 transition">New room</button>
+            <button onClick={() => navigate("/circle/create")} className="bg-white text-indigo-700 px-4 py-2 rounded-xl font-semibold shadow hover:-translate-y-0.5 transition">New circle</button>
           </div>
         </div>
 
@@ -156,9 +156,9 @@ const RoomList = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {loading ? (
-            <div className="col-span-2 text-slate-300">Loading rooms…</div>
+            <div className="col-span-2 text-slate-300">Loading circles…</div>
           ) : rooms.length === 0 ? (
-            <div className="col-span-2 text-slate-400 text-sm bg-slate-900 border border-slate-800 rounded-2xl p-6">No rooms yet. Create one to see it here.</div>
+            <div className="col-span-2 text-slate-400 text-sm bg-slate-900 border border-slate-800 rounded-2xl p-6">No circles yet. Create one to see it here.</div>
           ) : (
             rooms.map((room) => (
               <div
@@ -169,12 +169,12 @@ const RoomList = () => {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-slate-400">Code: {room.code}</p>
+                        <p className="text-sm text-slate-400">Circle code: {room.code}</p>
                         <input
                           value={editingName}
                           onChange={(e) => setEditingName(e.target.value)}
                           className="mt-1 w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm"
-                          placeholder="Room name"
+                          placeholder="Circle name"
                         />
                       </div>
                       <span className="text-xs text-slate-500">{editingMembers.length} members</span>
@@ -222,8 +222,8 @@ const RoomList = () => {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-slate-400">Code: {room.code}</p>
-                        <h3 className="text-xl font-semibold">{room.name || "Untitled room"}</h3>
+                        <p className="text-sm text-slate-400">Circle code: {room.code}</p>
+                        <h3 className="text-xl font-semibold">{room.name || "Untitled circle"}</h3>
                       </div>
                       <span className="text-xs text-slate-500">{room.members?.length || 0} members</span>
                     </div>
