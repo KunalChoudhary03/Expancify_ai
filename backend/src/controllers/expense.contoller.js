@@ -117,7 +117,7 @@ async function getExpenseById(req, res) {
     const expense = await expenseModel.findOne({_id:id, paidBy:req.user._id});
     if(!expense){
       return res.status(404).json({
-        message:"Expense not found or you are not authorized to view it"
+        message:"Expense not found or you should not have access to it"
       });
     }
     res.status(200).json({

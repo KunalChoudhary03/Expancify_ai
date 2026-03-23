@@ -16,7 +16,7 @@ RULES:
 ✓ USE EXACT SECTION NAMES
 ✓ For each unnecessary item: "- Item: ₹amount (reason)"
 ✓ Under 200 words total
-✓ Be concise and direct
+✓ Be concise and direct and to the point
 ✓ Be brutally honest
 ✓ NO extra sections or text outside the format 
 ✓ Focus on actionable insights, not generic advice`;
