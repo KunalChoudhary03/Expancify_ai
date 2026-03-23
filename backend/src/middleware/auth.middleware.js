@@ -7,7 +7,7 @@ async function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Unauthorized - No token" });
+      return res.status(401).json({ message: "Alert: Unauthorized - No token" });
     }
 
     
@@ -18,7 +18,7 @@ async function authMiddleware(req, res, next) {
     
     const user = await userModel.findById(decoded.id).select("-password");
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({ message: "Alert: User not found" });
     }
     
     req.user = user;
@@ -27,7 +27,7 @@ async function authMiddleware(req, res, next) {
 
   } catch (err) {
     return res.status(401).json({
-      message: "Invalid or expired token",
+      message: "Alert: Invalid or expired token",
       error: err.message
     });
   }
