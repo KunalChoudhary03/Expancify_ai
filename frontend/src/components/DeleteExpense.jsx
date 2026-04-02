@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
+import API_URL from '../config/api'
 
 const DeleteExpense = () => {
   const { expenseId } = useParams()
@@ -22,7 +23,7 @@ const DeleteExpense = () => {
       setLoading(true)
       const token = localStorage.getItem("token")
       const response = await axios.get(
-        `http://localhost:3000/api/expenses/get/${expenseId}`,
+        `${API_URL}/api/expenses/get/${expenseId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -44,7 +45,7 @@ const DeleteExpense = () => {
       setDeleting(true)
       const token = localStorage.getItem("token")
       await axios.delete(
-        `http://localhost:3000/api/expenses/delete/${expenseId}`,
+        `${API_URL}/api/expenses/delete/${expenseId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`

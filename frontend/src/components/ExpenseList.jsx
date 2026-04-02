@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import API_URL from "../config/api";
 
 const ExpenseList = () => {
   const [expenses, setExpenses] = useState([]);
@@ -13,7 +14,7 @@ const ExpenseList = () => {
         const token = localStorage.getItem("token");
 
         const response = await axios.get(
-          "http://localhost:3000/api/expenses/get",
+          `${API_URL}/api/expenses/get`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

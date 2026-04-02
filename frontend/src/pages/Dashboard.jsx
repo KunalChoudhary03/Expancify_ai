@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API_URL from "../config/api";
 const Dashboard = () => {
   const [aiResponse, setAiResponse] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,7 @@ const Dashboard = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:3000/api/ai/generate",{},
+        `${API_URL}/api/ai/generate`,{},
         {
           headers: {
             Authorization: `Bearer ${token}`,

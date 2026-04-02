@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_URL from "../config/api";
 
 const ExpenseForm = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const ExpenseForm = () => {
     const token = localStorage.getItem("token");
 
     const response = await axios.post(
-      "http://localhost:3000/api/expenses/add",
+      `${API_URL}/api/expenses/add`,
       { title, amount, date },
       {
         headers: {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_URL from "../config/api";
 
 const encodeMembers = (members) => btoa(JSON.stringify(members || []));
 const buildShareLink = (room) => {
@@ -36,7 +37,7 @@ const RoomList = () => {
         navigate("/login");
         return;
       }
-      const res = await axios.get("http://localhost:3000/api/circle", {
+      const res = await axios.get(`${API_URL}/api/circle`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRooms(res.data.rooms || []);
@@ -89,7 +90,7 @@ const RoomList = () => {
       }
 
       await axios.put(
-        `http://localhost:3000/api/circle/${editingCode}`,
+        `${API_URL}/api/circle/${editingCode}`,
         {
           roomName: editingName,
           members: editingMembers,
@@ -117,7 +118,7 @@ const RoomList = () => {
         navigate("/login");
         return;
       }
-      await axios.delete(`http://localhost:3000/api/circle/${code}`, {
+      await axios.delete(`${API_URL}/api/circle/${code}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (editingCode === code) cancelEdit();

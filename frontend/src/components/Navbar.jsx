@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_URL from "../config/api";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const Navbar = () => {
       
       if (token) {
         const response = await axios.get(
-          "http://localhost:3000/api/auth/profile",
+          `${API_URL}/api/auth/profile`,
           {
             headers: {
               Authorization: `Bearer ${token}`

@@ -8,11 +8,9 @@ const roomRoutes = require('./routes/room.routes')
 const cors = require('cors')
 const app = express()
 
-const allowedOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
 app.use(cors({
-  // Allow configured client; if wildcard, disable credentials so browsers allow it
-  origin: allowedOrigin === '*' ? true : allowedOrigin,
-  credentials: allowedOrigin === '*' ? false : true
+  origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+  credentials: true
 }))
 app.use(express.json())
 app.use("/api/auth", authRoutes)

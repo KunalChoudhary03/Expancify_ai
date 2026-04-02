@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
+import API_URL from '../config/api'
 
 const UpdateExpense = () => {
   const { expenseId } = useParams()
@@ -24,7 +25,7 @@ const UpdateExpense = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:3000/api/expenses/get/${expenseId}`,
+        `${API_URL}/api/expenses/get/${expenseId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -62,7 +63,7 @@ const UpdateExpense = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        `http://localhost:3000/api/expenses/update/${expenseId}`,
+        `${API_URL}/api/expenses/update/${expenseId}`,
         formData,
         {
           headers: {

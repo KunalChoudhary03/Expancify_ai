@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_URL from "../config/api";
 
 const encodeMembers = (members) => btoa(JSON.stringify(members));
 
@@ -76,7 +77,7 @@ const RoomCreate = () => {
       }
 
       await axios.post(
-        "http://localhost:3000/api/circle/create",
+        `${API_URL}/api/circle/create`,
         {
           roomCode,
           roomName,

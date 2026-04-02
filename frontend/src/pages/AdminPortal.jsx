@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API_URL from "../config/api";
 
 const AdminPortal = () => {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ const AdminPortal = () => {
         return;
       }
 
-      const res = await axios.get("http://localhost:3000/api/admin/user", {
+      const res = await axios.get(`${API_URL}/api/admin/user`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -108,7 +109,7 @@ const AdminPortal = () => {
         return;
       }
 
-      const res = await axios.get("http://localhost:3000/api/admin/user/spend-summary", {
+      const res = await axios.get(`${API_URL}/api/admin/user/spend-summary`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -133,7 +134,7 @@ const AdminPortal = () => {
         return;
       }
 
-      const res = await axios.get("http://localhost:3000/api/admin/circle", {
+      const res = await axios.get(`${API_URL}/api/admin/circle`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -164,7 +165,7 @@ const AdminPortal = () => {
     try {
       setLoadingExpenses(true);
       const res = await axios.get(
-        `http://localhost:3000/api/admin/user/expense/${user._id}`,
+        `${API_URL}/api/admin/user/expense/${user._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -216,7 +217,7 @@ const AdminPortal = () => {
 
     try {
       setLoadingRoomExpenses(true);
-      const res = await axios.get(`http://localhost:3000/api/admin/circle/expense/${room.code}`, {
+      const res = await axios.get(`${API_URL}/api/admin/circle/expense/${room.code}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const list = res.data?.expenses || [];
@@ -246,7 +247,7 @@ const AdminPortal = () => {
         return;
       }
 
-      await axios.delete(`http://localhost:3000/api/admin/circle/${code}`, {
+      await axios.delete(`${API_URL}/api/admin/circle/${code}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

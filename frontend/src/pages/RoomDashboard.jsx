@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_URL from "../config/api";
 
 const parseMembers = (search) => {
   try {
@@ -76,7 +77,7 @@ const RoomDashboard = () => {
       }
 
       await axios.post(
-        "http://localhost:3000/api/circle/create",
+        `${API_URL}/api/circle/create`,
         {
           roomCode,
           roomName,
@@ -105,7 +106,7 @@ const RoomDashboard = () => {
 
       const token = localStorage.getItem("token");
       await axios.post(
-        `http://localhost:3000/api/circle/${roomCode}/expense`,
+        `${API_URL}/api/circle/${roomCode}/expense`,
         {
           title,
           amount,
@@ -132,7 +133,7 @@ const RoomDashboard = () => {
     try {
       setLoadingBalances(true);
       const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:3000/api/circle/${roomCode}/balances`, {
+      const res = await axios.get(`${API_URL}/api/circle/${roomCode}/balances`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBalances((res.data.balances || []).map((b) => ({ userId: b.id, net: b.net, name: b.name })));
