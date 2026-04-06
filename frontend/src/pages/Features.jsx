@@ -39,6 +39,14 @@ const Features = () => {
                 desc: "Identify unnecessary expenses and discover areas where you can save money."
               },
               {
+                title: "Roommate Circles",
+                desc: "Create circles with your roommates to track shared expenses together in one dashboard."
+              },
+              {
+                title: "Circle Expense Reports",
+                desc: "Generate circle-wise reports and monitor unwanted expenses for each member with clear summaries."
+              },
+              {
                 title: "AI Insights",
                 desc: "Get intelligent recommendations based on your spending patterns."
               },

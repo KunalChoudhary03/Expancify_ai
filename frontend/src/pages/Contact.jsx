@@ -40,7 +40,7 @@ const Contact = () => {
 
             {/* Introduction */}
             <p className="text-gray-300 leading-relaxed">
-              Expansify is more than just an expense tracker — it's a smart
+              Expansify is more than just an expense tracker - it's a smart
               financial awareness platform designed to help people take control
               of their money and eliminate unnecessary spending.
             </p>
