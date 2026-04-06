@@ -1,25 +1,59 @@
 const expenseModel = require("../model/expence.model");
+const roomModel = require("../model/room.model");
+const roomExpenseModel = require("../model/roomExpense.model");
 const generateResponse = require("../services/ai.services");
 
 async function generateContent(req, res) {
   try {
-    //  Get user expenses
-    const expenses = await expenseModel.find({
-      paidBy: req.user._id
-    });
+    const { roomCode } = req.body;
 
-    if (!expenses.length) {
-      return res.status(404).json({
-        message: "No expenses found for analysis"
-      });
+    let expenses = [];
+    let promptTitle = "ANALYZE THESE USER EXPENSES STRICTLY:";
+
+    if (roomCode) {
+      const room = await roomModel.findOne({ code: roomCode, deleted: { $ne: true } });
+      if (!room) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+
+      if (room.createdBy?.toString() !== req.user._id?.toString()) {
+        return res.status(403).json({ message: "Not allowed to access this room" });
+      }
+
+      expenses = await roomExpenseModel.find({ roomCode }).sort({ date: -1 });
+
+      if (!expenses.length) {
+        return res.status(404).json({
+          message: "No room expenses found for analysis"
+        });
+      }
+
+      const membersById = new Map((room.members || []).map((m) => [m.id, m.name]));
+      promptTitle = `ANALYZE THESE ROOM EXPENSES STRICTLY (Room: ${room.name || room.code}):`;
+      expenses = expenses.map((exp) => ({
+        ...exp.toObject(),
+        paidByLabel: membersById.get(exp.paidBy) || exp.paidBy,
+      }));
+    } else {
+      expenses = await expenseModel.find({
+        paidBy: req.user._id
+      }).sort({ date: -1 });
+
+      if (!expenses.length) {
+        return res.status(404).json({
+          message: "No expenses found for analysis"
+        });
+      }
     }
 
-    // Create structured prompt with formatted expenses
-    const expenseList = expenses.map(exp => 
-      `${exp.title}: ₹${exp.amount} on ${new Date(exp.date).toLocaleDateString()}`
-    ).join('\n');
+    const expenseList = expenses
+      .map((exp) => {
+        const payer = exp.paidByLabel ? ` [Paid by: ${exp.paidByLabel}]` : "";
+        return `${exp.title}: ₹${exp.amount} on ${new Date(exp.date).toLocaleDateString()}${payer}`;
+      })
+      .join("\n");
 
-    const prompt = `ANALYZE THESE USER EXPENSES STRICTLY:
+    const prompt = `${promptTitle}
 
 ${expenseList}
 

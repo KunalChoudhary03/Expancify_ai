@@ -3,19 +3,62 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import API_URL from "../config/api";
 
-const REPORT_STORAGE_KEY = "dashboard_ai_report";
+const REPORT_STORAGE_KEY_PREFIX = "dashboard_ai_report";
 
 const Dashboard = () => {
   const [aiResponse, setAiResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [reportScope, setReportScope] = useState("personal");
+  const [rooms, setRooms] = useState([]);
+  const [selectedRoomCode, setSelectedRoomCode] = useState("");
   const navigate = useNavigate();
 
+  const getReportStorageKey = (scope, roomCode = "") => {
+    if (scope === "room" && roomCode) {
+      return `${REPORT_STORAGE_KEY_PREFIX}_room_${roomCode}`;
+    }
+    return `${REPORT_STORAGE_KEY_PREFIX}_personal`;
+  };
+
   useEffect(() => {
-    const savedReport = localStorage.getItem(REPORT_STORAGE_KEY);
+    const savedReport = localStorage.getItem(getReportStorageKey(reportScope, selectedRoomCode));
     if (savedReport) {
       setAiResponse(savedReport);
+      setError("");
+      return;
     }
+
+    setAiResponse("");
+  }, [reportScope, selectedRoomCode]);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          return;
+        }
+
+        const response = await axios.get(`${API_URL}/api/circle`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const fetchedRooms = response.data.rooms || [];
+        setRooms(fetchedRooms);
+
+        if (fetchedRooms.length > 0) {
+          setSelectedRoomCode((prev) => prev || fetchedRooms[0].code || "");
+        }
+      } catch {
+        setRooms([]);
+      }
+    };
+
+    fetchRooms();
   }, []);
 
   const generateAIAnalysis = async () => {
@@ -32,8 +75,14 @@ const Dashboard = () => {
         return;
       }
 
+      if (reportScope === "room" && !selectedRoomCode) {
+        setError("Please select a room first");
+        return;
+      }
+
       const response = await axios.post(
-        `${API_URL}/api/ai/generate`,{},
+        `${API_URL}/api/ai/generate`,
+        reportScope === "room" ? { roomCode: selectedRoomCode } : {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -44,7 +93,10 @@ const Dashboard = () => {
       // ✅ Safe response handling
       if (response.data && response.data.response) {
         setAiResponse(response.data.response);
-        localStorage.setItem(REPORT_STORAGE_KEY, response.data.response);
+        localStorage.setItem(
+          getReportStorageKey(reportScope, selectedRoomCode),
+          response.data.response
+        );
       } else {
         setError("Invalid response from server");
       }
@@ -166,12 +218,50 @@ const Dashboard = () => {
         </div>
 
         {/* Generate Button */}
+        <div className="mt-6 mb-4 bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Report Type</label>
+              <select
+                value={reportScope}
+                onChange={(e) => setReportScope(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+              >
+                <option value="personal">My Added Expenses</option>
+                <option value="room">Particular Room Expenses</option>
+              </select>
+            </div>
+
+            {reportScope === "room" && (
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Select Room</label>
+                <select
+                  value={selectedRoomCode}
+                  onChange={(e) => setSelectedRoomCode(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"
+                >
+                  {rooms.length === 0 && <option value="">No rooms available</option>}
+                  {rooms.map((room) => (
+                    <option key={room._id || room.code} value={room.code}>
+                      {room.name || room.code}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
+
         <button
           onClick={generateAIAnalysis}
           disabled={loading}
           className="w-full bg-linear-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white py-4 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-indigo-500/50 hover:scale-105"
         >
-          {loading ? "⏳ Analyzing your expenses..." : "✨ Generate AI Analysis"}
+          {loading
+            ? "⏳ Analyzing your expenses..."
+            : reportScope === "room"
+              ? "✨ Generate Room AI Analysis"
+              : "✨ Generate AI Analysis"}
         </button>
 
         {/* Error */}
