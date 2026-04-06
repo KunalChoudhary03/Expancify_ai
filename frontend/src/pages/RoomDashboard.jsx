@@ -36,6 +36,11 @@ const RoomDashboard = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [activeTab, setActiveTab] = useState("expenses");
+  const [editingId, setEditingId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editAmount, setEditAmount] = useState("");
+  const [editDate, setEditDate] = useState("");
+  const [menuOpen, setMenuOpen] = useState(null);
 
   useEffect(() => {
     const memberList = parseMembers(location.search);
@@ -148,6 +153,67 @@ const RoomDashboard = () => {
   };
 
   const formatCurrency = (val) => `₹${Math.abs(Number(val || 0)).toLocaleString()}`;
+
+  const handleEditExpense = async (expId) => {
+    try {
+      setError("");
+      setSuccess("");
+      
+      if (!editTitle || !editAmount) {
+        setError("Title and amount are required");
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `${API_URL}/api/circle/${roomCode}/expense/${expId}`,
+        {
+          title: editTitle,
+          amount: editAmount,
+          date: editDate,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setSuccess("Expense updated");
+      setEditingId(null);
+      fetchBalances();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update expense");
+    }
+  };
+
+  const handleDeleteExpense = async (expId) => {
+    if (!window.confirm("Delete this expense?")) return;
+    
+    try {
+      setError("");
+      setSuccess("");
+      setMenuOpen(null);
+      
+      const token = localStorage.getItem("token");
+      console.log("Deleting expense:", expId, "from room:", roomCode);
+      
+      const response = await axios.delete(
+        `${API_URL}/api/circle/${roomCode}/expense/${expId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      console.log("Delete response:", response.data);
+      setSuccess("Expense deleted");
+      fetchBalances();
+    } catch (err) {
+      console.error("Delete error:", err.response?.data || err.message);
+      setError(err.response?.data?.message || err.message || "Failed to delete expense");
+    }
+  };
+
+  const openEditModal = (exp) => {
+    setEditingId(exp.id);
+    setEditTitle(exp.title);
+    setEditAmount(exp.amount);
+    setEditDate(exp.date ? exp.date.split("T")[0] : "");
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 text-white pt-24 pb-16 px-4">
@@ -339,6 +405,69 @@ const RoomDashboard = () => {
                           <span className={yourNet >= 0 ? "text-emerald-400 font-semibold" : "text-red-400 font-semibold"}>
                             {yourNet >= 0 ? "+" : "-"}{formatCurrency(Math.abs(yourNet))}
                           </span>
+                        </div>
+                      )}
+
+                      {editingId === exp.id ? (
+                        <div className="bg-slate-900 rounded-lg p-3 space-y-2 mt-3">
+                          <input
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            placeholder="Title"
+                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                          />
+                          <input
+                            type="number"
+                            value={editAmount}
+                            onChange={(e) => setEditAmount(e.target.value)}
+                            placeholder="Amount"
+                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                          />
+                          <input
+                            type="date"
+                            value={editDate}
+                            onChange={(e) => setEditDate(e.target.value)}
+                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEditExpense(exp.id)}
+                              className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg text-sm font-semibold"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => { setEditingId(null); setMenuOpen(null); }}
+                              className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg text-sm font-semibold"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-end relative">
+                          <button
+                            onClick={() => setMenuOpen(menuOpen === exp.id ? null : exp.id)}
+                            className="text-xl px-2 py-1 text-slate-400 hover:text-indigo-400 transition"
+                          >
+                            ⋮
+                          </button>
+                          {menuOpen === exp.id && (
+                            <div className="absolute right-0 top-8 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-10 min-w-max">
+                              <button
+                                onClick={() => { openEditModal(exp); setMenuOpen(null); }}
+                                className="block w-full text-left px-4 py-2 text-sm text-blue-400 hover:bg-slate-700 first:rounded-t-lg"
+                              >
+                                ✏️ Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteExpense(exp.id)}
+                                className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-slate-700 last:rounded-b-lg"
+                              >
+                                🗑️ Delete
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

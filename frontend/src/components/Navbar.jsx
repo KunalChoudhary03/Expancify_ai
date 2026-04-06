@@ -1,15 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import API_URL from "../config/api";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [darkMode, setDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(localStorage.getItem("token")));
   const [username, setUsername] = useState(() => localStorage.getItem("username") || "");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef(null);
+
+  const isPathActive = (path) => location.pathname === path;
 
   useEffect(() => {
     if (darkMode) {
@@ -127,14 +130,17 @@ const Navbar = () => {
 
         {/* Navigation Links - Desktop */}
         <ul className="hidden md:flex space-x-8 font-medium items-center">
-          <li  onClick={() => navigate("/")} className="hover:text-indigo-600 cursor-pointer transition">
+          <li
+            onClick={() => navigate("/")}
+            className={`cursor-pointer transition ${isPathActive("/") ? "text-indigo-600" : "hover:text-indigo-600"}`}
+          >
             Home
           </li>
           
           {/* Dashboard - Special Highlight */}
           <li 
             onClick={()=>navigate("/dashboard")} 
-            className="bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-110 relative overflow-hidden group"
+            className={`bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold cursor-pointer transition-all duration-300 relative overflow-hidden group ${isPathActive("/dashboard") ? "ring-2 ring-indigo-300" : "hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-110"}`}
           >
             <span className="relative z-10 flex items-center gap-2">
               <span className="text-lg">✨</span>
@@ -144,7 +150,7 @@ const Navbar = () => {
           </li>
           <li 
             onClick={()=>navigate("/circle/create")} 
-            className="bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-110 relative overflow-hidden group"
+            className={`bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold cursor-pointer transition-all duration-300 relative overflow-hidden group ${isPathActive("/circle/create") ? "ring-2 ring-indigo-300" : "hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-110"}`}
           >
             <span className="relative z-10 flex items-center gap-2">
               <span className="text-lg"></span>
@@ -154,14 +160,20 @@ const Navbar = () => {
           </li>
           <li 
             onClick={()=>navigate("/circle/list")} 
-            className="bg-slate-900 text-white px-4 py-2 rounded-full font-semibold cursor-pointer border border-slate-700 hover:border-indigo-500 transition"
+            className={`bg-slate-900 text-white px-4 py-2 rounded-full font-semibold cursor-pointer transition ${isPathActive("/circle/list") ? "border-indigo-500 text-indigo-300 border" : "border border-slate-700 hover:border-indigo-500"}`}
           >
             My Circles
           </li>
-            <li onClick={()=>navigate("/features")} className="hover:text-indigo-600 cursor-pointer transition">
+            <li
+              onClick={()=>navigate("/features")}
+              className={`cursor-pointer transition ${isPathActive("/features") ? "text-indigo-600" : "hover:text-indigo-600"}`}
+            >
             Features
           </li>
-          <li onClick={()=>navigate("/contact")} className="hover:text-indigo-600 cursor-pointer transition">
+          <li
+            onClick={()=>navigate("/contact")}
+            className={`cursor-pointer transition ${isPathActive("/contact") ? "text-indigo-600" : "hover:text-indigo-600"}`}
+          >
             Contact
           </li>
         </ul>
@@ -229,34 +241,34 @@ const Navbar = () => {
             {/* Navigation Links */}
             <button
               onClick={() => handleNavigation("/")}
-              className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium"
+              className={`block w-full text-left px-3 py-2 transition font-medium ${isPathActive("/") ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"}`}
             >
               Home
             </button>
 
             <button
               onClick={() => handleNavigation("/features")}
-              className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium"
+              className={`block w-full text-left px-3 py-2 transition font-medium ${isPathActive("/features") ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"}`}
             >
               Features
             </button>
 
             <button
               onClick={() => handleNavigation("/contact")}
-              className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium"
+              className={`block w-full text-left px-3 py-2 transition font-medium ${isPathActive("/contact") ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"}`}
             >
               Contact
             </button>
 
             <button
               onClick={() => handleNavigation("/circle/create")}
-              className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium"
+              className={`block w-full text-left px-3 py-2 transition font-medium ${isPathActive("/circle/create") ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"}`}
             >
               Create Circle
             </button>
             <button
               onClick={() => handleNavigation("/circle/list")}
-              className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium"
+              className={`block w-full text-left px-3 py-2 transition font-medium ${isPathActive("/circle/list") ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"}`}
             >
               My Circles
             </button>

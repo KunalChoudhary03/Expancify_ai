@@ -160,6 +160,80 @@ async function addExpense(req, res) {
   }
 }
 
+async function editExpense(req, res) {
+  try {
+    const { code, expenseId } = req.params;
+    const { title, amount, paidBy, participants, date } = req.body;
+    const userId = req.user?._id;
+
+    const room = await roomModel.findOne({ code });
+    if (!room) return res.status(404).json({ message: "circle not found" });
+    if (room.deleted) return res.status(410).json({ message: room.deletedReason || "circle deleted by admin" });
+
+    const expense = await roomExpenseModel.findById(expenseId);
+    if (!expense) return res.status(404).json({ message: "expense not found" });
+    if (expense.deleted) return res.status(410).json({ message: "expense already deleted" });
+    if (expense.roomCode !== code) return res.status(403).json({ message: "expense not in this circle" });
+
+    if (expense.createdBy && expense.createdBy.toString() !== userId?.toString()) {
+      return res.status(403).json({ message: "Only expense creator can edit" });
+    }
+
+    if (title) expense.title = title;
+    if (amount !== undefined) {
+      const numericAmount = Number(amount);
+      if (Number.isNaN(numericAmount) || numericAmount <= 0) {
+        return res.status(400).json({ message: "amount must be positive" });
+      }
+      expense.amount = numericAmount;
+    }
+    if (paidBy) expense.paidBy = paidBy;
+    if (participants && Array.isArray(participants)) expense.participants = participants;
+    if (date) expense.date = new Date(date);
+    expense.updatedAt = new Date();
+
+    await expense.save();
+    return res.status(200).json({ message: "expense updated", expense });
+  } catch (err) {
+    return res.status(500).json({ message: "server error", error: err.message });
+  }
+}
+
+async function deleteExpense(req, res) {
+  try {
+    const { code, expenseId } = req.params;
+    const userId = req.user?._id;
+
+    console.log("[DELETE EXPENSE] Attempting:", { code, expenseId, userId });
+
+    const room = await roomModel.findOne({ code });
+    if (!room) return res.status(404).json({ message: "circle not found" });
+    if (room.deleted) return res.status(410).json({ message: room.deletedReason || "circle deleted by admin" });
+
+    const expense = await roomExpenseModel.findById(expenseId);
+    if (!expense) return res.status(404).json({ message: "expense not found" });
+    if (expense.deleted) return res.status(410).json({ message: "expense already deleted" });
+    if (expense.roomCode !== code) return res.status(403).json({ message: "expense not in this circle" });
+
+    console.log("[DELETE EXPENSE] Checking permission. Created by:", expense.createdBy, "Current user:", userId);
+
+    if (expense.createdBy && expense.createdBy.toString() !== userId?.toString()) {
+      console.log("[DELETE EXPENSE] Permission denied - not creator");
+      return res.status(403).json({ message: "Only expense creator can delete" });
+    }
+
+    expense.deleted = true;
+    expense.deletedAt = new Date();
+    await expense.save();
+
+    console.log("[DELETE EXPENSE] Successfully deleted");
+    return res.status(200).json({ message: "expense deleted" });
+  } catch (err) {
+    console.error("[DELETE EXPENSE] Error:", err.message);
+    return res.status(500).json({ message: "server error", error: err.message });
+  }
+}
+
 async function getBalances(req, res) {
   try {
     const { code } = req.params;
@@ -167,7 +241,7 @@ async function getBalances(req, res) {
     if (!room) return res.status(404).json({ message: "circle not found" });
     if (room.deleted) return res.status(410).json({ message: room.deletedReason || "circle deleted by admin" });
 
-    const expenses = await roomExpenseModel.find({ roomCode: code });
+    const expenses = await roomExpenseModel.find({ roomCode: code, deleted: { $ne: true } });
     const membersById = new Map(room.members.map((m) => [m.id, m]));
 
     const netMap = new Map();
@@ -243,6 +317,8 @@ module.exports = {
   createRoom,
   getRoom,
   addExpense,
+  editExpense,
+  deleteExpense,
   getBalances,
   listRooms,
   updateRoom,
