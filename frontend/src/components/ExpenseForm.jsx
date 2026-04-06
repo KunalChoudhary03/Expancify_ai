@@ -21,6 +21,11 @@ const ExpenseForm = () => {
 
   try {
     const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Please login first");
+      navigate("/login");
+      return;
+    }
 
     const response = await axios.post(
       `${API_URL}/api/expenses/add`,
@@ -38,6 +43,12 @@ const ExpenseForm = () => {
 
   } catch (err) {
     console.log(err.response?.data || err.message);
+    if (err.response?.status === 401) {
+      setError("Please login first");
+      navigate("/login");
+      return;
+    }
+
     setError(err.response?.data?.message || "Failed to add expense. Please try again.");
   } finally {
     setLoading(false);

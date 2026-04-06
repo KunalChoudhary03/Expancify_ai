@@ -7,7 +7,7 @@ async function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Alert: Unauthorized - No token" });
+      return res.status(401).json({ message: "Please Login first" });
     }
 
     
@@ -27,7 +27,7 @@ async function authMiddleware(req, res, next) {
 
   } catch (err) {
     return res.status(401).json({
-      message: "Alert: Invalid or expired token",
+      message: "Please Login first",
       error: err.message
     });
   }

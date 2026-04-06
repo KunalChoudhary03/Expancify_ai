@@ -154,7 +154,8 @@ const RoomDashboard = () => {
       setTitle("");
       setAmount("");
       setDate("");
-      fetchBalances();
+      await fetchBalances();
+      setActiveTab("balances");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add expense");
     } finally {
