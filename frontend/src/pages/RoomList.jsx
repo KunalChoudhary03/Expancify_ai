@@ -153,7 +153,7 @@ const RoomList = () => {
           </div>
         </div>
 
-        {error && <div className="p-4 rounded-xl bg-red-500/10 border border-red-500 text-red-200">{error}</div>}
+        {error && <div className="app-alert app-alert-error" role="alert">{error}</div>}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {loading ? (
@@ -188,7 +188,7 @@ const RoomList = () => {
                         placeholder="Add member name"
                         className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm"
                       />
-                      <button onClick={addMember} className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-semibold">Add</button>
+                      <button onClick={addMember} className="animate-add-button bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-semibold">Add</button>
                     </div>
 
                     <div className="flex flex-wrap gap-2">

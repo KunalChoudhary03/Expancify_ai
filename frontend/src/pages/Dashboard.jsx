@@ -1,12 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import API_URL from "../config/api";
+
+const REPORT_STORAGE_KEY = "dashboard_ai_report";
+
 const Dashboard = () => {
   const [aiResponse, setAiResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedReport = localStorage.getItem(REPORT_STORAGE_KEY);
+    if (savedReport) {
+      setAiResponse(savedReport);
+    }
+  }, []);
 
   const generateAIAnalysis = async () => {
     try {
@@ -34,6 +44,7 @@ const Dashboard = () => {
       // ✅ Safe response handling
       if (response.data && response.data.response) {
         setAiResponse(response.data.response);
+        localStorage.setItem(REPORT_STORAGE_KEY, response.data.response);
       } else {
         setError("Invalid response from server");
       }
@@ -158,14 +169,14 @@ const Dashboard = () => {
         <button
           onClick={generateAIAnalysis}
           disabled={loading}
-          className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white py-4 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-indigo-500/50 hover:scale-105"
+          className="w-full bg-linear-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white py-4 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 shadow-lg hover:shadow-indigo-500/50 hover:scale-105"
         >
           {loading ? "⏳ Analyzing your expenses..." : "✨ Generate AI Analysis"}
         </button>
 
         {/* Error */}
         {error && (
-          <div className="mt-6 bg-red-500/20 border border-red-500 text-red-400 p-4 rounded-xl animate-in fade-in slide-in-from-top">
+          <div className="app-alert app-alert-error mt-6 animate-in fade-in slide-in-from-top" role="alert">
             {error}
           </div>
         )}

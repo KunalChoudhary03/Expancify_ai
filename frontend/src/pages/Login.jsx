@@ -22,6 +22,7 @@ const Login = () => {
         { withCredentials: true }
       );  
       localStorage.setItem("token", response.data.token);
+      window.dispatchEvent(new Event("auth-changed"));
       setTimeout(() => navigate('/'), 500);
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Login failed. Please try again.";
@@ -50,7 +51,7 @@ const Login = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-3 bg-red-500 bg-opacity-20 border border-red-500 rounded-lg text-red-400 text-sm animate-in fade-in shake duration-300">
+          <div className="app-alert app-alert-error mb-6 animate-in fade-in shake duration-300" role="alert">
             {error}
           </div>
         )}
@@ -93,7 +94,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 animate-in fade-in slide-in-from-bottom duration-500 delay-300"
+            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 animate-in fade-in slide-in-from-bottom duration-500 delay-300"
           >
             {loading ? "Logging in..." : "Login"}
           </button>

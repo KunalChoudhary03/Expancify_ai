@@ -59,13 +59,13 @@ const ExpenseForm = () => {
         </h2>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-500 bg-opacity-20 border border-red-500 rounded-lg text-red-400 text-sm animate-in fade-in duration-300">
+          <div className="app-alert app-alert-error mb-4 animate-in fade-in duration-300" role="alert">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 p-3 bg-green-500 bg-opacity-20 border border-green-500 rounded-lg text-green-400 text-sm animate-in fade-in duration-300">
+          <div className="app-alert app-alert-success mb-4 animate-in fade-in duration-300" role="status">
             ✓ {success}
           </div>
         )}

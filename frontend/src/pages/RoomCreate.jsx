@@ -148,7 +148,7 @@ const RoomCreate = () => {
                 />
                 <button
                   onClick={addMember}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-xl font-semibold"
+                  className="animate-add-button bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-xl font-semibold"
                 >
                   Add
                 </button>
@@ -184,8 +184,8 @@ const RoomCreate = () => {
           </div>
         </div>
 
-        {error && <div className="p-4 rounded-xl bg-red-500/10 border border-red-500 text-red-200">{error}</div>}
-        {success && <div className="p-4 rounded-xl bg-green-500/10 border border-green-500 text-green-200">{success}</div>}
+        {error && <div className="app-alert app-alert-error" role="alert">{error}</div>}
+        {success && <div className="app-alert app-alert-success" role="status">{success}</div>}
       </div>
     </div>
   );

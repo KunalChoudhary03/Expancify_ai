@@ -152,8 +152,8 @@ const RoomDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-950 text-white pt-24 pb-16 px-4">
       <div className="max-w-5xl mx-auto space-y-8">
-        {error && <div className="p-4 rounded-xl bg-red-500/10 border border-red-500 text-red-200">{error}</div>}
-        {success && <div className="p-4 rounded-xl bg-green-500/10 border border-green-500 text-green-200">{success}</div>}
+        {error && <div className="app-alert app-alert-error" role="alert">{error}</div>}
+        {success && <div className="app-alert app-alert-success" role="status">{success}</div>}
 
         <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-6 space-y-5">
           <div className="flex items-center justify-between">

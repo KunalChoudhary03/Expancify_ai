@@ -287,7 +287,7 @@ const AdminPortal = () => {
             </button>
             <button
               onClick={() => navigate("/dashboard")}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition"
+              className="px-4 py-2 rounded-xl bg-linear-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition"
             >
               AI Dashboard
             </button>
@@ -332,7 +332,7 @@ const AdminPortal = () => {
           </div>
 
           {summaryError && (
-            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500 text-red-200">
+            <div className="app-alert app-alert-error" role="alert">
               {summaryError}
             </div>
           )}
@@ -374,11 +374,12 @@ const AdminPortal = () => {
 
         {(error || info || roomError || roomInfo) && (
           <div
-            className={`p-4 rounded-2xl border ${
+            className={`app-alert ${
               error || roomError
-                ? "bg-red-500/10 border-red-500 text-red-200"
-                : "bg-indigo-500/10 border-indigo-500 text-indigo-200"
+                ? "app-alert-error"
+                : "app-alert-info"
             }`}
+            role={error || roomError ? "alert" : "status"}
           >
             {error || roomError || info || roomInfo}
           </div>
@@ -397,7 +398,7 @@ const AdminPortal = () => {
               </div>
             </div>
 
-            <div className="h-[520px] overflow-y-auto space-y-3 pr-1">
+            <div className="h-130 overflow-y-auto space-y-3 pr-1">
               {loadingUsers ? (
                 <p className="text-slate-400">Loading users…</p>
               ) : filteredUsers.length ? (
@@ -464,7 +465,7 @@ const AdminPortal = () => {
                             key={expense._id}
                             className="border-t border-slate-800 hover:bg-slate-800/60"
                           >
-                            <td className="px-4 py-3 font-medium text-white whitespace-normal break-words">{expense.title}</td>
+                            <td className="px-4 py-3 font-medium text-white whitespace-normal wrap-break-word">{expense.title}</td>
                             <td className="px-4 py-3 text-indigo-200 text-right whitespace-nowrap">₹{Number(expense.amount).toLocaleString()}</td>
                             <td className="px-4 py-3 text-slate-400 text-right whitespace-nowrap">{expense.date}</td>
                           </tr>
@@ -501,7 +502,7 @@ const AdminPortal = () => {
               </button>
             </div>
 
-            <div className="h-[520px] overflow-y-auto space-y-3 pr-1">
+            <div className="h-130 overflow-y-auto space-y-3 pr-1">
               {loadingRooms ? (
                 <p className="text-slate-400">Loading circles…</p>
               ) : filteredRooms.length ? (

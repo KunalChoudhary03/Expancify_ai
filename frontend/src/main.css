@@ -10,3 +10,124 @@ html {
 body {
   overflow-x: hidden;
 }
+
+:root {
+  --brand-500: #4A70A9;
+  --brand-600: #3F5F90;
+  --brand-700: #35527D;
+  --brand-100: #E4ECF8;
+  --brand-200: #C7D5EA;
+  --brand-300: #9DB3D4;
+  --brand-400: #6E8DBA;
+}
+
+/* Global primary theme mapping to keep UX/UI color consistent */
+.bg-indigo-600 { background-color: var(--brand-500) !important; }
+.bg-indigo-700 { background-color: var(--brand-600) !important; }
+.bg-indigo-800 { background-color: var(--brand-700) !important; }
+.bg-indigo-100 { background-color: var(--brand-100) !important; }
+.bg-indigo-900 { background-color: #203552 !important; }
+
+.text-indigo-100 { color: var(--brand-100) !important; }
+.text-indigo-200 { color: var(--brand-200) !important; }
+.text-indigo-300 { color: var(--brand-300) !important; }
+.text-indigo-400 { color: var(--brand-400) !important; }
+.text-indigo-600 { color: var(--brand-500) !important; }
+.text-indigo-700 { color: var(--brand-600) !important; }
+
+.border-indigo-500 { border-color: var(--brand-500) !important; }
+.border-indigo-600 { border-color: var(--brand-500) !important; }
+
+.hover\:bg-indigo-500:hover { background-color: var(--brand-600) !important; }
+.hover\:bg-indigo-700:hover { background-color: var(--brand-700) !important; }
+.hover\:text-indigo-400:hover { color: var(--brand-400) !important; }
+.hover\:text-indigo-600:hover { color: var(--brand-500) !important; }
+.hover\:border-indigo-500:hover { border-color: var(--brand-500) !important; }
+
+.focus\:ring-indigo-500:focus {
+  --tw-ring-color: var(--brand-500) !important;
+}
+
+/* Gradient remap for existing from/via/to classes */
+.from-indigo-600 {
+  --tw-gradient-from: var(--brand-500) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(74 112 169 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+.to-indigo-600 {
+  --tw-gradient-to: var(--brand-500) var(--tw-gradient-to-position) !important;
+}
+
+.to-indigo-700 {
+  --tw-gradient-to: var(--brand-600) var(--tw-gradient-to-position) !important;
+}
+
+.to-indigo-800 {
+  --tw-gradient-to: var(--brand-700) var(--tw-gradient-to-position) !important;
+}
+
+.from-purple-600 {
+  --tw-gradient-from: #5A7DB5 var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(90 125 181 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+.via-purple-600 {
+  --tw-gradient-to: rgb(90 125 181 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #5A7DB5 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+
+.to-purple-600 {
+  --tw-gradient-to: #5A7DB5 var(--tw-gradient-to-position) !important;
+}
+
+.app-alert {
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(10px);
+}
+
+.app-alert-error {
+  background: rgba(69, 10, 10, 0.92);
+  border-color: rgba(248, 113, 113, 0.9);
+  color: #fecaca;
+}
+
+.app-alert-success {
+  background: rgba(6, 46, 36, 0.92);
+  border-color: rgba(52, 211, 153, 0.9);
+  color: #bbf7d0;
+}
+
+.app-alert-info {
+  background: rgba(8, 47, 73, 0.92);
+  border-color: rgba(56, 189, 248, 0.9);
+  color: #bae6fd;
+}
+
+@keyframes addButtonBreath {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+.animate-add-button {
+  animation: addButtonBreath 2.2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-add-button {
+    animation: none;
+  }
+}

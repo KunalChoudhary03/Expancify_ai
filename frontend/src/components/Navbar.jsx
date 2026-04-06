@@ -6,9 +6,8 @@ import API_URL from "../config/api";
 const Navbar = () => {
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(localStorage.getItem("token")));
+  const [username, setUsername] = useState(() => localStorage.getItem("username") || "");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -21,6 +20,23 @@ const Navbar = () => {
 
   useEffect(() => {
     checkAuthStatus();
+    const handleAuthChanged = () => {
+      checkAuthStatus();
+    };
+
+    const handleStorageChange = (event) => {
+      if (event.key === "token" || event.key === "username") {
+        checkAuthStatus();
+      }
+    };
+
+    window.addEventListener("auth-changed", handleAuthChanged);
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("auth-changed", handleAuthChanged);
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   const checkAuthStatus = async () => {
@@ -28,6 +44,13 @@ const Navbar = () => {
       const token = localStorage.getItem("token");
       
       if (token) {
+        setIsLoggedIn(true);
+
+        const cachedUsername = localStorage.getItem("username");
+        if (cachedUsername) {
+          setUsername(cachedUsername);
+        }
+
         const response = await axios.get(
           `${API_URL}/api/auth/profile`,
           {
@@ -38,24 +61,29 @@ const Navbar = () => {
         );
         
         setIsLoggedIn(true);
-        setUsername(response.data.user.username || response.data.user.fullName);
+        const profileUsername = response.data.user.username || response.data.user.fullName || "";
+        setUsername(profileUsername);
+        localStorage.setItem("username", profileUsername);
       } else {
         setIsLoggedIn(false);
+        setUsername("");
       }
     } catch (err) {
       console.log(err);
       setIsLoggedIn(false);
+      setUsername("");
       localStorage.removeItem("token");
-    } finally {
-      setLoading(false);
+      localStorage.removeItem("username");
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("username");
     setIsLoggedIn(false);
     setUsername("");
     setMobileMenuOpen(false);
+    window.dispatchEvent(new Event("auth-changed"));
     navigate("/login");
   };
 
@@ -87,23 +115,23 @@ const Navbar = () => {
           {/* Dashboard - Special Highlight */}
           <li 
             onClick={()=>navigate("/dashboard")} 
-            className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-110 relative overflow-hidden group"
+            className="bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-110 relative overflow-hidden group"
           >
             <span className="relative z-10 flex items-center gap-2">
               <span className="text-lg">✨</span>
               AI Dashboard
             </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-linear-to-r from-purple-600 via-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </li>
           <li 
             onClick={()=>navigate("/circle/create")} 
-            className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-110 relative overflow-hidden group"
+            className="bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-semibold cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-110 relative overflow-hidden group"
           >
             <span className="relative z-10 flex items-center gap-2">
               <span className="text-lg"></span>
               Create Circle
             </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-linear-to-r from-purple-600 via-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </li>
           <li 
             onClick={()=>navigate("/circle/list")} 
@@ -120,19 +148,18 @@ const Navbar = () => {
         </ul>
 
         {/* Right Side Buttons - Desktop */}
-        <div className="hidden md:flex items-center space-x-4">
-          {!loading && (
-            isLoggedIn ? (
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 bg-indigo-100 dark:bg-indigo-900 px-4 py-2 rounded-lg">
+        <div className="hidden md:flex min-w-[280px] items-center justify-end space-x-4">
+          {isLoggedIn ? (
+              <div className="flex min-w-[280px] items-center justify-end gap-4">
+                <div className="flex min-w-[140px] items-center gap-2 bg-indigo-100 dark:bg-indigo-900 px-4 py-2 rounded-lg">
                   <span className="text-lg">👤</span>
-                  <span className="font-semibold text-indigo-600 dark:text-indigo-300">
+                  <span className="font-semibold text-indigo-600 dark:text-indigo-300 truncate max-w-[90px]">
                     {username}
                   </span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                  className="min-w-[92px] px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                 >
                   Logout
                 </button>
@@ -141,27 +168,26 @@ const Navbar = () => {
               <>
                 <button
                   onClick={() => navigate("/login")}
-                  className="px-4 py-2 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 dark:hover:bg-zinc-800 transition"
+                  className="min-w-[92px] px-4 py-2 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 dark:hover:bg-zinc-800 transition"
                 >
                   Login
                 </button>
 
                 <button
                   onClick={() => navigate("/register")}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                  className="min-w-[92px] px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
                 >
                   Sign Up
                 </button>
               </>
-            )
-          )}
+            )}
         </div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-3">
           <button
             onClick={() => navigate("/dashboard")}
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-105 flex items-center gap-1"
+            className="bg-linear-to-r from-indigo-600 to-purple-600 text-white px-3 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/50 hover:scale-105 flex items-center gap-1"
           >
             <span>✨</span>
             <span className="text-sm">AI</span>
@@ -229,8 +255,7 @@ const Navbar = () => {
             <div className="border-t border-gray-300 dark:border-gray-700 my-2"></div>
 
             {/* Auth Buttons */}
-            {!loading && (
-              isLoggedIn ? (
+            {isLoggedIn ? (
                 <>
                   <div className="px-3 py-2 bg-indigo-100 dark:bg-indigo-900 rounded-lg">
                     <p className="text-sm text-gray-600 dark:text-gray-400">Logged in as</p>
@@ -260,7 +285,7 @@ const Navbar = () => {
                   </button>
                 </>
               )
-            )}
+            }
           </div>
         </div>
       )}
