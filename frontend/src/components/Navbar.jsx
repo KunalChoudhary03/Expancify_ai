@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API_URL from "../config/api";
@@ -9,6 +9,7 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(localStorage.getItem("token")));
   const [username, setUsername] = useState(() => localStorage.getItem("username") || "");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navRef = useRef(null);
 
   useEffect(() => {
     if (darkMode) {
@@ -38,6 +39,24 @@ const Navbar = () => {
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleOutsideClick = (event) => {
+      if (navRef.current && !navRef.current.contains(event.target)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
+  }, [mobileMenuOpen]);
 
   const checkAuthStatus = async () => {
     try {
@@ -93,7 +112,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full fixed top-0 left-0 z-50 shadow-md 
+    <nav ref={navRef} className="w-full fixed top-0 left-0 z-50 shadow-md 
                     bg-white text-black 
                     dark:bg-black dark:text-white transition">
       
@@ -241,15 +260,6 @@ const Navbar = () => {
             >
               My Circles
             </button>
-
-            {isLoggedIn && (
-              <button
-                onClick={() => handleNavigation("/admin")}
-                className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium"
-              >
-                Admin
-              </button>
-            )}
 
             {/* Divider */}
             <div className="border-t border-gray-300 dark:border-gray-700 my-2"></div>
