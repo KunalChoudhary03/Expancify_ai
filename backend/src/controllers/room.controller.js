@@ -6,9 +6,37 @@ function validMembers(members) {
   return members.every((m) => m && typeof m.id === "string" && typeof m.name === "string");
 }
 
+function normalizeJoinedMember(req, selectedMemberId, selectedMemberName) {
+  if (!req.user?._id) return null;
+
+  return {
+    userId: req.user._id,
+    email: req.user.email,
+    username: req.user.username,
+    selectedMemberId: selectedMemberId || undefined,
+    selectedMemberName: selectedMemberName || undefined,
+    joinedAt: new Date()
+  };
+}
+
+function upsertJoinedUser(room, joinedUser) {
+  if (!joinedUser) return;
+
+  const existingIndex = (room.joinedUsers || []).findIndex((item) => item.userId?.toString() === joinedUser.userId.toString());
+  if (existingIndex >= 0) {
+    room.joinedUsers[existingIndex] = {
+      ...room.joinedUsers[existingIndex].toObject?.() || room.joinedUsers[existingIndex],
+      ...joinedUser
+    };
+    return;
+  }
+
+  room.joinedUsers = [...(room.joinedUsers || []), joinedUser];
+}
+
 async function createRoom(req, res) {
   try {
-    const { roomCode, roomName, members } = req.body;
+    const { roomCode, roomName, members, selectedMemberId, selectedMemberName } = req.body;
 
     if (!roomCode) {
       return res.status(400).json({ message: "circleCode is required" });
@@ -20,6 +48,7 @@ async function createRoom(req, res) {
 
     const existing = await roomModel.findOne({ code: roomCode });
     if (existing) {
+      const joinedUser = normalizeJoinedMember(req, selectedMemberId, selectedMemberName);
       if (existing.deleted) {
         existing.deleted = false;
         existing.deletedByAdmin = false;
@@ -28,16 +57,24 @@ async function createRoom(req, res) {
         if (roomName) existing.name = roomName;
         if (members) existing.members = members;
         if (req.user?._id) existing.createdBy = req.user._id;
+        upsertJoinedUser(existing, joinedUser);
         await existing.save();
         return res.status(200).json({ message: "circle restored", room: existing });
       }
+      upsertJoinedUser(existing, joinedUser);
+      if (joinedUser) {
+        await existing.save();
+      }
       return res.status(200).json({ message: "circle already exists", room: existing });
     }
+
+    const joinedUser = normalizeJoinedMember(req, selectedMemberId, selectedMemberName);
 
     const room = await roomModel.create({
       code: roomCode,
       name: roomName,
       members: members || [],
+      joinedUsers: joinedUser ? [joinedUser] : [],
       createdBy: req.user?._id
     });
 
@@ -50,7 +87,15 @@ async function createRoom(req, res) {
 async function listRooms(req, res) {
   try {
     const userId = req.user?._id;
-    const filter = userId ? { createdBy: userId, deleted: { $ne: true } } : { deleted: { $ne: true } };
+    const filter = userId
+      ? {
+          deleted: { $ne: true },
+          $or: [
+            { createdBy: userId },
+            { "joinedUsers.userId": userId }
+          ]
+        }
+      : { deleted: { $ne: true } };
     const rooms = await roomModel.find(filter).sort({ createdAt: -1 });
     return res.status(200).json({ rooms, count: rooms.length });
   } catch (err) {

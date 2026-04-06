@@ -4,6 +4,26 @@ import axios from "axios";
 import API_URL from "../config/api";
 
 const encodeMembers = (members) => btoa(JSON.stringify(members || []));
+const joinedCirclesKey = "joinedCirclesRegistry";
+
+const readJoinedCircles = () => {
+  try {
+    const raw = localStorage.getItem(joinedCirclesKey);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    return [];
+  }
+};
+
+const mergeRooms = (createdRooms, joinedRooms) => {
+  const map = new Map();
+  [...joinedRooms, ...createdRooms].forEach((room) => {
+    if (!room?.code) return;
+    map.set(room.code, room);
+  });
+  return Array.from(map.values());
+};
 const buildShareLink = (room) => {
   const params = new URLSearchParams();
   params.set("circle", room.code);
@@ -40,7 +60,8 @@ const RoomList = () => {
       const res = await axios.get(`${API_URL}/api/circle`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setRooms(res.data.rooms || []);
+      const joinedRooms = readJoinedCircles();
+      setRooms(mergeRooms(res.data.rooms || [], joinedRooms));
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load circles");
     } finally {
@@ -141,10 +162,10 @@ const RoomList = () => {
   return (
     <div className="min-h-screen bg-gray-950 text-white pt-24 pb-16 px-4">
       <div className="max-w-5xl mx-auto space-y-8">
-        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 rounded-3xl p-8 shadow-2xl flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="bg-linear-to-r from-indigo-600 via-purple-600 to-indigo-700 rounded-3xl p-8 shadow-2xl flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <p className="text-indigo-100 text-sm uppercase tracking-wider">My Circles</p>
-            <h1 className="text-3xl font-bold">Circles you created</h1>
+            <h1 className="text-3xl font-bold">Circles you created or joined</h1>
             <p className="text-indigo-100 text-sm">Total: {rooms.length}</p>
           </div>
           <div className="flex gap-2">

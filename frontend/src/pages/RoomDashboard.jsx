@@ -14,6 +14,25 @@ const parseMembers = (search) => {
   }
 };
 
+const joinedCirclesKey = "joinedCirclesRegistry";
+
+const saveJoinedCircle = (roomCode, roomName, members, selectedMember) => {
+  try {
+    const existing = JSON.parse(localStorage.getItem(joinedCirclesKey) || "[]");
+    const next = Array.isArray(existing) ? existing.filter((room) => room?.code !== roomCode) : [];
+    next.unshift({
+      code: roomCode,
+      name: roomName || roomCode,
+      members: members || [],
+      selectedMember,
+      joinedAt: new Date().toISOString(),
+    });
+    localStorage.setItem(joinedCirclesKey, JSON.stringify(next));
+  } catch (err) {
+    console.error("Failed to save joined circle", err);
+  }
+};
+
 const RoomDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,6 +73,11 @@ const RoomDashboard = () => {
     } else if (memberList[0]) {
       setSelectedMemberId(memberList[0].id);
     }
+
+    if (roomCode && memberList.length) {
+      const selectedMember = stored ? JSON.parse(stored) : memberList[0] || null;
+      saveJoinedCircle(roomCode, roomName, memberList, selectedMember);
+    }
   }, [location.search, roomCode]);
 
   useEffect(() => {
@@ -81,12 +105,16 @@ const RoomDashboard = () => {
         return;
       }
 
+      const selectedMember = members.find((m) => m.id === selectedMemberId) || null;
+
       await axios.post(
         `${API_URL}/api/circle/create`,
         {
           roomCode,
           roomName,
           members,
+          selectedMemberId,
+          selectedMemberName: selectedMember?.name || "",
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );

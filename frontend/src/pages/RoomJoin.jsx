@@ -12,6 +12,25 @@ const parseMembers = (search) => {
   }
 };
 
+const joinedCirclesKey = "joinedCirclesRegistry";
+
+const saveJoinedCircle = (roomCode, roomName, members, selectedMember) => {
+  try {
+    const existing = JSON.parse(localStorage.getItem(joinedCirclesKey) || "[]");
+    const next = Array.isArray(existing) ? existing.filter((room) => room?.code !== roomCode) : [];
+    next.unshift({
+      code: roomCode,
+      name: roomName || roomCode,
+      members: members || [],
+      selectedMember,
+      joinedAt: new Date().toISOString(),
+    });
+    localStorage.setItem(joinedCirclesKey, JSON.stringify(next));
+  } catch (err) {
+    console.error("Failed to save joined circle", err);
+  }
+};
+
 const RoomJoin = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -36,6 +55,7 @@ const RoomJoin = () => {
     const member = members.find((m) => m.id === selectedId);
     if (!member) return;
     localStorage.setItem(`circleIdentity_${roomCode}`, JSON.stringify(member));
+    saveJoinedCircle(roomCode, roomName, members, member);
     navigate(`/circle/dashboard${location.search}`);
   };
 
