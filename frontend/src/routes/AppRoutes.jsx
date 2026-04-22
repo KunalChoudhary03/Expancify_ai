@@ -1,4 +1,5 @@
-import { Routes , Route } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Routes , Route, useLocation } from 'react-router-dom'
 import ExpenseList from '../components/ExpenseList'
 import ExpenseCard from '../components/ExpenseCard'
 import ExpenseForm from '../components/ExpenseForm'
@@ -16,10 +17,31 @@ import RoomList from '../pages/RoomList'
 import UpdateExpense from '../components/UpdateExpense'
 import DeleteExpense from '../components/DeleteExpense'
 import Contact from '../pages/Contact'
+import Loader from '../components/Loader'
 const AppRoutes = () => {
+  const location = useLocation()
+  const [showSplash, setShowSplash] = useState(() => location.pathname === '/')
+
+  useEffect(() => {
+    if (!showSplash) {
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      setShowSplash(false)
+    }, 2400)
+
+    return () => window.clearTimeout(timer)
+  }, [showSplash])
+
+  const showHomeSplash = location.pathname === '/' && showSplash
+
   return (
     <div>
-        <Navbar />
+        {!showHomeSplash && <Navbar />}
+        {showHomeSplash ? (
+          <Loader />
+        ) : (
         <Routes>
            <Route path='/' element={<Home />} />
              <Route path='/ExpenseList' element={<ExpenseList />} />
@@ -40,6 +62,7 @@ const AppRoutes = () => {
              <Route path='/contact' element={<Contact />} />
              <Route path='*' element={<h1>404 Not Found</h1>} />
         </Routes>
+        )}
     </div>
 
   )

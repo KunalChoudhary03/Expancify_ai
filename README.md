@@ -25,7 +25,7 @@ This project is designed for students who want a modern tracker finance .
 
 Typical setup:
 - **Frontend**: React
-- **Backend**: Node.js and Express.j
+- **Backend**: Node.js and Express.js
 - **Database**:  MongoDB 
 - **AI layer**: LLM API integration for categorization and insights
 - **Auth**: JWT 
@@ -114,8 +114,8 @@ npm run dev
 
 ### 5) Open in browser
 
-- Frontend: `http://localhost:3000`
-- Backend API: `http://localhost:5000` (or configured port)
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:3000` (or configured port)
 
 ## Available Scripts
 
@@ -162,6 +162,4 @@ Typical expense endpoints:
    - implementation details
    - test evidence/screenshots
 
-## License
 
-Add the project license here (e.g., MIT) once finalized.
