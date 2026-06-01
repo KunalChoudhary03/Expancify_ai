@@ -91,6 +91,12 @@ const RoomDashboard = () => {
     setParticipants((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
   };
 
+  const updatePositiveAmount = (value, setter) => {
+    if (value === "" || Number(value) > 0) {
+      setter(value);
+    }
+  };
+
   const ensureRoom = async () => {
     try {
       setError("");
@@ -133,6 +139,12 @@ const RoomDashboard = () => {
 
       if (!title || !amount || !selectedMemberId || participants.length === 0) {
         setError("Fill all fields and select people");
+        setLoadingExpense(false);
+        return;
+      }
+
+      if (Number(amount) <= 0) {
+        setError("Amount must be greater than 0");
         setLoadingExpense(false);
         return;
       }
@@ -190,6 +202,11 @@ const RoomDashboard = () => {
       
       if (!editTitle || !editAmount) {
         setError("Title and amount are required");
+        return;
+      }
+
+      if (Number(editAmount) <= 0) {
+        setError("Amount must be greater than 0");
         return;
       }
 
@@ -332,8 +349,10 @@ const RoomDashboard = () => {
                     <label className="block text-xs text-slate-400 mb-1">Amount (INR)</label>
                     <input
                       type="number"
+                      min="0.01"
+                      step="0.01"
                       value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
+                      onChange={(e) => updatePositiveAmount(e.target.value, setAmount)}
                       className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
@@ -447,8 +466,10 @@ const RoomDashboard = () => {
                           />
                           <input
                             type="number"
+                            min="0.01"
+                            step="0.01"
                             value={editAmount}
-                            onChange={(e) => setEditAmount(e.target.value)}
+                            onChange={(e) => updatePositiveAmount(e.target.value, setEditAmount)}
                             placeholder="Amount"
                             className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
                           />

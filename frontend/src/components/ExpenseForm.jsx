@@ -13,10 +13,23 @@ const ExpenseForm = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const handleAmountChange = (e) => {
+    const nextAmount = e.target.value;
+    if (nextAmount === "" || Number(nextAmount) > 0) {
+      setAmount(nextAmount);
+    }
+  };
+
   const handleExpense = async (e) => {
   e.preventDefault();
   setError("");
   setSuccess("");
+
+  if (Number(amount) <= 0) {
+    setError("Amount must be greater than 0");
+    return;
+  }
+
   setLoading(true);
 
   try {
@@ -104,8 +117,10 @@ const ExpenseForm = () => {
             </label>
             <input
               type="number"
+              min="0.01"
+              step="0.01"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={handleAmountChange}
               placeholder="Enter amount"
               required
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-500"

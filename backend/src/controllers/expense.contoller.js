@@ -10,9 +10,16 @@ async function addExpense(req, res) {
       });
     }
 
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      return res.status(400).json({
+        message: "Amount must be greater than 0"
+      });
+    }
+
     const expense = await expenseModel.create({
       title,
-      amount,
+      amount: numericAmount,
       date: date || new Date(),
       paidBy: req.user._id   // 👈 yaha se aayega
     });
@@ -67,8 +74,17 @@ async function updateExpense(req, res) {
       });
     }
 
+    if (amount !== undefined) {
+      const numericAmount = Number(amount);
+      if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+        return res.status(400).json({
+          message: "Amount must be greater than 0"
+        });
+      }
+      expense.amount = numericAmount;
+    }
+
     if (title !== undefined) expense.title = title;
-    if (amount !== undefined) expense.amount = amount;
     if (date !== undefined) expense.date = date;
 
     

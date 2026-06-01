@@ -57,12 +57,12 @@ async function generateContent(req, res) {
 
 ${expenseList}
 
-RESPOND WITH EXACT FORMAT:
+  Generate a detailed report in this format:
 === Expense Analysis ===
-Summary: [brief overview]
-Unnecessary Spending: [list wasteful items only]
-Spending Patterns: [recurring wasteful patterns]
-Smart Suggestions: [actionable cost cuts]
+  Summary: [brief but meaningful overview]
+  Unnecessary Spending: [each wasteful item with amount and short reason]
+  Spending Patterns: [recurring wasteful patterns with examples]
+  Smart Suggestions: [actionable cost cuts with practical limits]
 Estimated Monthly Savings Potential: [exact ₹ amount]`;
 
     // Call AI service
@@ -74,9 +74,22 @@ Estimated Monthly Savings Potential: [exact ₹ amount]`;
     });
 
   } catch (err) {
+    let detailedMessage = err?.message || "Unknown AI error";
+
+    // Google SDK often returns JSON stringified error payload in message.
+    try {
+      const parsed = JSON.parse(detailedMessage);
+      detailedMessage =
+        parsed?.error?.message ||
+        parsed?.message ||
+        detailedMessage;
+    } catch (_parseErr) {
+      // keep original message when it is not JSON
+    }
+
     res.status(500).json({
       message: "Error generating AI response",
-      error: err.message
+      error: detailedMessage
     });
   }
 }

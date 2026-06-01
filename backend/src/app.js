@@ -8,8 +8,14 @@ const roomRoutes = require('./routes/room.routes')
 const cors = require('cors')
 const app = express()
 
+const allowedOrigins = [
+  'https://expancify-ai.vercel.app',
+  'http://localhost:5173',
+  process.env.CLIENT_ORIGIN
+].filter(Boolean)
+
 app.use(cors({
-  origin: ['https://expancify-ai.vercel.app', 'http://localhost:5173'],
+  origin: allowedOrigins,
   credentials: true
 }))
 app.use(express.json())

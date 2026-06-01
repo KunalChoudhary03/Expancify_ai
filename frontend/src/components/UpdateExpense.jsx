@@ -15,6 +15,16 @@ const UpdateExpense = () => {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
+  const handleAmountChange = (e) => {
+    const nextAmount = e.target.value
+    if (nextAmount === "" || Number(nextAmount) > 0) {
+      setFormData({
+        ...formData,
+        amount: nextAmount
+      })
+    }
+  }
+
   useEffect(() => {
     if (expenseId) {
       fetchExpense()
@@ -59,6 +69,12 @@ const UpdateExpense = () => {
     e.preventDefault()
     setError("")
     setSuccess("")
+
+    if (Number(formData.amount) <= 0) {
+      setError("Amount must be greater than 0")
+      return
+    }
+
     setLoading(true)
     try {
       const token = localStorage.getItem("token");
@@ -125,9 +141,11 @@ const UpdateExpense = () => {
             <label className="block mb-1 font-medium text-gray-300">Amount</label>
             <input
               type="number"
+              min="0.01"
+              step="0.01"
               name="amount"
               value={formData.amount}
-              onChange={handleChange}
+              onChange={handleAmountChange}
               placeholder="Enter amount"
               required
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-500"

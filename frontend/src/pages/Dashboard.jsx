@@ -102,7 +102,9 @@ const Dashboard = () => {
       }
     } catch (err) {
       const message =
-        err.response?.data?.message || "Failed to generate AI analysis";
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Failed to generate AI analysis";
       setError(message);
     } finally {
       setLoading(false);
